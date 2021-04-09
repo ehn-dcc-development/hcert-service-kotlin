@@ -1,6 +1,14 @@
 package ehn.techiop.hcert.kotlin
 
 import com.google.zxing.BarcodeFormat
+import ehn.techiop.hcert.kotlin.chain.Base45Service
+import ehn.techiop.hcert.kotlin.chain.CborProcessingChain
+import ehn.techiop.hcert.kotlin.chain.CborService
+import ehn.techiop.hcert.kotlin.chain.CompressorService
+import ehn.techiop.hcert.kotlin.chain.CryptoService
+import ehn.techiop.hcert.kotlin.chain.RandomKeyCryptoService
+import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
+import ehn.techiop.hcert.kotlin.chain.ValSuiteService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 

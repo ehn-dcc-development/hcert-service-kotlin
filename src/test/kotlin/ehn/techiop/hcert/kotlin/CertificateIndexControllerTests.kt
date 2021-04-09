@@ -1,6 +1,8 @@
 package ehn.techiop.hcert.kotlin
 
 import COSE.HeaderKeys
+import ehn.techiop.hcert.kotlin.chain.CryptoService
+import ehn.techiop.hcert.kotlin.chain.fromBase64
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

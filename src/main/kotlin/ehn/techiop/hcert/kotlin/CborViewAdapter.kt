@@ -1,5 +1,8 @@
 package ehn.techiop.hcert.kotlin
 
+import ehn.techiop.hcert.kotlin.chain.Base45Service
+import ehn.techiop.hcert.kotlin.chain.CborProcessingChain
+import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 

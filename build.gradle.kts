@@ -26,14 +26,12 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
 	implementation("org.jetbrains.kotlinx:kotlinx-serialization-cbor:1.1.0")
-	implementation("com.augustcellars.cose:cose-java:1.1.0")
-	implementation("com.google.zxing:core:3.4.1")
-	implementation("com.google.zxing:javase:3.4.1")
-	implementation("org.bouncycastle:bcpkix-jdk15on:1.68")
-	implementation("com.squareup.okhttp3:okhttp:4.9.0")
+    implementation("com.google.zxing:core:3.4.1")
+	implementation("ehn.techiop.hcert:hcert-kotlin:0.1.0-SNAPSHOT")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("com.augustcellars.cose:cose-java:1.1.0")
 }
 
 tasks.withType<KotlinCompile> {
