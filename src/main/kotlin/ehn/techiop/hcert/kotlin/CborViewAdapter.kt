@@ -14,7 +14,7 @@ class CborViewAdapter(
 ) {
 
     fun process(input: String): CardViewModel {
-        val result = cborProcessingChain.process(Json { isLenient = true }.decodeFromString(input))
+        val result = cborProcessingChain.process(Json { isLenient = true; ignoreUnknownKeys = true }.decodeFromString(input))
         val qrCode = qrCodeService.encode(result.prefixedEncodedCompressedCose)
         val aztecCode = aztecService.encode(result.prefixedEncodedCompressedCose)
         return CardViewModel(

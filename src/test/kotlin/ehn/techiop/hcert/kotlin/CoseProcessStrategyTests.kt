@@ -77,7 +77,7 @@ class CoseProcessStrategyTests {
 
     private fun assertPlain(input: String, jsonInput: String) {
         val vaccinationData = cborProcessingChain.verify(input)
-        val decodedFromInput = Json { isLenient = true }.decodeFromString<VaccinationData>(jsonInput)
+        val decodedFromInput = Json { isLenient = true; ignoreUnknownKeys = true }.decodeFromString<VaccinationData>(jsonInput)
         assertThat(vaccinationData, equalTo(decodedFromInput))
     }
 
