@@ -36,11 +36,11 @@ class CoseProcessStrategyTests {
         val cardViewModel = cborViewAdapter.process(Input.pastInfectedJson)
 
         assertThat(cardViewModel.title, equalTo("COSE"))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(408))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(543))
+        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(338))
+        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(471))
 
         val prefixedCompressedCose = cardViewModel.base64Items.find { it.title == "Prefixed Compressed COSE" }?.value
-        assertThat(prefixedCompressedCose?.length, isAround(535))
+        assertThat(prefixedCompressedCose?.length, isAround(472))
         if (prefixedCompressedCose == null) throw AssertionError()
         assertPlain(prefixedCompressedCose, Input.pastInfectedJson)
     }
@@ -50,11 +50,11 @@ class CoseProcessStrategyTests {
         val cardViewModel = cborViewAdapter.process(Input.vaccinatedJson)
 
         assertThat(cardViewModel.title, equalTo("COSE"))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(840))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(975))
+        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(770))
+        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(905))
 
         val prefixedCompressedCose = cardViewModel.base64Items.find { it.title == "Prefixed Compressed COSE" }?.value
-        assertThat(prefixedCompressedCose?.length, isAround(718))
+        assertThat(prefixedCompressedCose?.length, isAround(673))
         if (prefixedCompressedCose == null) throw AssertionError()
         assertPlain(prefixedCompressedCose, Input.vaccinatedJson)
     }
@@ -64,11 +64,11 @@ class CoseProcessStrategyTests {
         val cardViewModel = cborViewAdapter.process(Input.testedJson)
 
         assertThat(cardViewModel.title, equalTo("COSE"))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(750))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(885))
+        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(548))
+        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(683))
 
         val prefixedCompressedCose = cardViewModel.base64Items.find { it.title == "Prefixed Compressed COSE" }?.value
-        assertThat(prefixedCompressedCose?.length, isAround(778))
+        assertThat(prefixedCompressedCose?.length, isAround(649))
         if (prefixedCompressedCose == null) throw AssertionError()
         assertPlain(prefixedCompressedCose, Input.testedJson)
     }
