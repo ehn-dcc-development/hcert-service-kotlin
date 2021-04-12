@@ -1,5 +1,6 @@
 package ehn.techiop.hcert.kotlin
 
+import ehn.techiop.hcert.kotlin.chain.SampleData
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -31,7 +32,7 @@ class CertificateGenerationServiceApplicationTests {
     fun modelGenerateCOSE() {
         val mvcResult = mockMvc.post("/generate") {
             contentType = MediaType.APPLICATION_FORM_URLENCODED
-            param("vaccinationData", Input.pastInfectedJson)
+            param("vaccinationData", SampleData.recovery)
         }.andExpect {
             status { isOk() }
             content { contentType("text/html;charset=UTF-8") }

@@ -1,5 +1,6 @@
 package ehn.techiop.hcert.kotlin
 
+import ehn.techiop.hcert.kotlin.chain.SampleData
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
@@ -16,9 +17,9 @@ class CertificateGenerationController(private val cborViewAdapter: CborViewAdapt
     @GetMapping("/")
     fun index(model: Model): String {
         log.info("index called")
-        model.addAttribute("pastInfectedJson", Input.pastInfectedJson)
-        model.addAttribute("vaccinatedJson", Input.vaccinatedJson)
-        model.addAttribute("testedJson", Input.testedJson)
+        model.addAttribute("pastInfectedJson", SampleData.recovery)
+        model.addAttribute("vaccinatedJson", SampleData.vaccination)
+        model.addAttribute("testedJson", SampleData.test)
         return "index"
     }
 

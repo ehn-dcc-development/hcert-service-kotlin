@@ -6,6 +6,8 @@ import ehn.techiop.hcert.kotlin.chain.CborProcessingChain
 import ehn.techiop.hcert.kotlin.chain.CborService
 import ehn.techiop.hcert.kotlin.chain.CompressorService
 import ehn.techiop.hcert.kotlin.chain.CryptoService
+import ehn.techiop.hcert.kotlin.chain.DefaultCborService
+import ehn.techiop.hcert.kotlin.chain.DefaultValSuiteService
 import ehn.techiop.hcert.kotlin.chain.RandomKeyCryptoService
 import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.ValSuiteService
@@ -32,12 +34,12 @@ class ServiceConfiguration {
 
     @Bean
     fun cborService(cryptoService: CryptoService): CborService {
-        return CborService(cryptoService)
+        return DefaultCborService(cryptoService)
     }
 
     @Bean
     fun valSuiteService(): ValSuiteService {
-        return ValSuiteService()
+        return DefaultValSuiteService()
     }
 
     @Bean

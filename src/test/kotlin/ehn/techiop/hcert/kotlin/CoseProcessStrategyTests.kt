@@ -3,12 +3,13 @@ package ehn.techiop.hcert.kotlin
 import com.google.zxing.BarcodeFormat
 import ehn.techiop.hcert.kotlin.chain.Base45Service
 import ehn.techiop.hcert.kotlin.chain.CborProcessingChain
-import ehn.techiop.hcert.kotlin.chain.CborService
 import ehn.techiop.hcert.kotlin.chain.CompressorService
+import ehn.techiop.hcert.kotlin.chain.DefaultCborService
+import ehn.techiop.hcert.kotlin.chain.DefaultValSuiteService
 import ehn.techiop.hcert.kotlin.chain.RandomKeyCryptoService
+import ehn.techiop.hcert.kotlin.chain.SampleData
 import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.VaccinationData
-import ehn.techiop.hcert.kotlin.chain.ValSuiteService
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.hamcrest.CoreMatchers.equalTo
@@ -23,8 +24,8 @@ class CoseProcessStrategyTests {
     private val qrCodeService = TwoDimCodeService(350, BarcodeFormat.QR_CODE)
     private val aztecService = TwoDimCodeService(350, BarcodeFormat.AZTEC)
     private val cryptoService = RandomKeyCryptoService()
-    private val cborService = CborService(cryptoService)
-    private val valSuiteService = ValSuiteService()
+    private val cborService = DefaultCborService(cryptoService)
+    private val valSuiteService = DefaultValSuiteService()
     private val compressorService = CompressorService()
     private val base45Service = Base45Service()
     private val cborProcessingChain =
@@ -32,45 +33,45 @@ class CoseProcessStrategyTests {
     private val cborViewAdapter = CborViewAdapter(cborProcessingChain, base45Service, qrCodeService, aztecService)
 
     @Test
-    fun pastInfected() {
-        val cardViewModel = cborViewAdapter.process(Input.pastInfectedJson)
+    fun recovery() {
+        val cardViewModel = cborViewAdapter.process(SampleData.recovery)
 
         assertThat(cardViewModel.title, equalTo("COSE"))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(338))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(471))
+        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(386))
+        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(557))
 
         val prefixedCompressedCose = cardViewModel.base64Items.find { it.title == "Prefixed Compressed COSE" }?.value
-        assertThat(prefixedCompressedCose?.length, isAround(472))
+        assertThat(prefixedCompressedCose?.length, isAround(549))
         if (prefixedCompressedCose == null) throw AssertionError()
-        assertPlain(prefixedCompressedCose, Input.pastInfectedJson)
+        assertPlain(prefixedCompressedCose, SampleData.recovery)
     }
 
     @Test
-    fun vaccinated() {
-        val cardViewModel = cborViewAdapter.process(Input.vaccinatedJson)
+    fun vaccination() {
+        val cardViewModel = cborViewAdapter.process(SampleData.vaccination)
 
         assertThat(cardViewModel.title, equalTo("COSE"))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(770))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(905))
+        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(779))
+        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(950))
 
         val prefixedCompressedCose = cardViewModel.base64Items.find { it.title == "Prefixed Compressed COSE" }?.value
-        assertThat(prefixedCompressedCose?.length, isAround(673))
+        assertThat(prefixedCompressedCose?.length, isAround(721))
         if (prefixedCompressedCose == null) throw AssertionError()
-        assertPlain(prefixedCompressedCose, Input.vaccinatedJson)
+        assertPlain(prefixedCompressedCose, SampleData.vaccination)
     }
 
     @Test
-    fun tested() {
-        val cardViewModel = cborViewAdapter.process(Input.testedJson)
+    fun test() {
+        val cardViewModel = cborViewAdapter.process(SampleData.test)
 
         assertThat(cardViewModel.title, equalTo("COSE"))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(548))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(683))
+        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(618))
+        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(789))
 
         val prefixedCompressedCose = cardViewModel.base64Items.find { it.title == "Prefixed Compressed COSE" }?.value
-        assertThat(prefixedCompressedCose?.length, isAround(649))
+        assertThat(prefixedCompressedCose?.length, isAround(700))
         if (prefixedCompressedCose == null) throw AssertionError()
-        assertPlain(prefixedCompressedCose, Input.testedJson)
+        assertPlain(prefixedCompressedCose, SampleData.test)
     }
 
     private fun isAround(input: Int) = allOf(greaterThan(input.div(10) * 9), lessThan(input.div(10) * 11))
