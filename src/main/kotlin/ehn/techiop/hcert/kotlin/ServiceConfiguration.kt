@@ -24,11 +24,6 @@ class ServiceConfiguration {
     }
 
     @Bean
-    fun aztecService(): TwoDimCodeService {
-        return TwoDimCodeService(350, BarcodeFormat.AZTEC)
-    }
-
-    @Bean
     fun cryptoService(): CryptoService {
         return RandomKeyCryptoService()
     }
@@ -74,9 +69,8 @@ class ServiceConfiguration {
         cborProcessingChain: CborProcessingChain,
         base45Service: Base45Service,
         qrCodeService: TwoDimCodeService,
-        aztecService: TwoDimCodeService
     ): CborViewAdapter {
-        return CborViewAdapter(cborProcessingChain, base45Service, qrCodeService, aztecService)
+        return CborViewAdapter(cborProcessingChain, base45Service, qrCodeService)
     }
 
 

@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test
 class CoseProcessStrategyTests {
 
     private val qrCodeService = TwoDimCodeService(350, BarcodeFormat.QR_CODE)
-    private val aztecService = TwoDimCodeService(350, BarcodeFormat.AZTEC)
     private val cryptoService = RandomKeyCryptoService()
     private val cborService = CborService()
     private val coseService = DefaultCoseService(cryptoService)
@@ -32,7 +31,7 @@ class CoseProcessStrategyTests {
     private val base45Service = Base45Service()
     private val cborProcessingChain =
         CborProcessingChain(cborService, coseService, valSuiteService, compressorService, base45Service)
-    private val cborViewAdapter = CborViewAdapter(cborProcessingChain, base45Service, qrCodeService, aztecService)
+    private val cborViewAdapter = CborViewAdapter(cborProcessingChain, base45Service, qrCodeService)
 
     @Test
     fun recovery() {
