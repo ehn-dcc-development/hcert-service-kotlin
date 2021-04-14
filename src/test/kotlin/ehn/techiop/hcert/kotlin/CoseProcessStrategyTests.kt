@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test
 
 class CoseProcessStrategyTests {
 
+    private val title = "CoseProcessStrategyTest"
     private val qrCodeService = TwoDimCodeService(350, BarcodeFormat.QR_CODE)
     private val cryptoService = RandomKeyCryptoService()
     private val cborService = CborService()
@@ -35,13 +36,13 @@ class CoseProcessStrategyTests {
 
     @Test
     fun recovery() {
-        val cardViewModel = cborViewAdapter.process(SampleData.recovery)
+        val cardViewModel = cborViewAdapter.process(title, SampleData.recovery)
 
-        assertThat(cardViewModel.title, equalTo("COSE"))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(422))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(557))
+        assertThat(cardViewModel.title, equalTo(title))
+        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Hex)" }?.value?.length, isAround(562))
+        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Hex)" }?.value?.length, isAround(742))
 
-        val prefixedCompressedCose = cardViewModel.base64Items.find { it.title == "Prefixed Compressed COSE" }?.value
+        val prefixedCompressedCose = cardViewModel.base64Items.find { it.title.startsWith("Prefixed Compressed COSE") }?.value
         assertThat(prefixedCompressedCose?.length, isAround(549))
         if (prefixedCompressedCose == null) throw AssertionError()
         assertPlain(prefixedCompressedCose, SampleData.recovery)
@@ -49,28 +50,28 @@ class CoseProcessStrategyTests {
 
     @Test
     fun vaccination() {
-        val cardViewModel = cborViewAdapter.process(SampleData.vaccination)
+        val cardViewModel = cborViewAdapter.process(title, SampleData.vaccination)
 
-        assertThat(cardViewModel.title, equalTo("COSE"))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(779))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(950))
+        assertThat(cardViewModel.title, equalTo(title))
+        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Hex)" }?.value?.length, isAround(1086))
+        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Hex)" }?.value?.length, isAround(1266))
 
-        val prefixedCompressedCose = cardViewModel.base64Items.find { it.title == "Prefixed Compressed COSE" }?.value
-        assertThat(prefixedCompressedCose?.length, isAround(721))
+        val prefixedCompressedCose = cardViewModel.base64Items.find { it.title.startsWith("Prefixed Compressed COSE") }?.value
+        assertThat(prefixedCompressedCose?.length, isAround(730))
         if (prefixedCompressedCose == null) throw AssertionError()
         assertPlain(prefixedCompressedCose, SampleData.vaccination)
     }
 
     @Test
     fun test() {
-        val cardViewModel = cborViewAdapter.process(SampleData.test)
+        val cardViewModel = cborViewAdapter.process(title, SampleData.test)
 
-        assertThat(cardViewModel.title, equalTo("COSE"))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Base45)" }?.value?.length, isAround(618))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Base45)" }?.value?.length, isAround(789))
+        assertThat(cardViewModel.title, equalTo(title))
+        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Hex)" }?.value?.length, isAround(872))
+        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Hex)" }?.value?.length, isAround(1052))
 
-        val prefixedCompressedCose = cardViewModel.base64Items.find { it.title == "Prefixed Compressed COSE" }?.value
-        assertThat(prefixedCompressedCose?.length, isAround(700))
+        val prefixedCompressedCose = cardViewModel.base64Items.find { it.title.startsWith("Prefixed Compressed COSE") }?.value
+        assertThat(prefixedCompressedCose?.length, isAround(691))
         if (prefixedCompressedCose == null) throw AssertionError()
         assertPlain(prefixedCompressedCose, SampleData.test)
     }

@@ -26,18 +26,18 @@ class CertificateGenerationController(private val cborViewAdapter: CborViewAdapt
     @PostMapping("/generate")
     fun generateCertificate(@RequestParam(name = "vaccinationData") input: String, model: Model): String {
         log.info("generateCertificate called")
-        val cardViewModels = listOf(cborViewAdapter.process(input))
+        val cardViewModels = listOf(cborViewAdapter.process("User Input", input))
         model.addAllAttributes(mapOf("cardViewModels" to cardViewModels))
         return "vaccinationCertificate"
     }
 
-    @PostMapping("/generateAll")
-    fun generateAllCertificates(model: Model): String {
-        log.info("generateAllCertificates called")
+    @PostMapping("/testsuite")
+    fun testSuite(model: Model): String {
+        log.info("testsuite called")
         val cardViewModels = listOf(
-            cborViewAdapter.process(SampleData.recovery),
-            cborViewAdapter.process(SampleData.vaccination),
-            cborViewAdapter.process(SampleData.test)
+            cborViewAdapter.process("Recovery statement", SampleData.recovery),
+            cborViewAdapter.process("Vaccination statement", SampleData.vaccination),
+            cborViewAdapter.process("Test statement", SampleData.test)
         )
         model.addAllAttributes(mapOf("cardViewModels" to cardViewModels))
         return "vaccinationCertificate"

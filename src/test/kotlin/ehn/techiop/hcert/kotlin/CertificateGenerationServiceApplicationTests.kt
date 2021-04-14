@@ -20,7 +20,7 @@ class CertificateGenerationServiceApplicationTests {
     lateinit var mockMvc: MockMvc
 
     @Test
-    fun modelIndex() {
+    fun index() {
         mockMvc.get("/").andExpect {
             status { isOk() }
             content { contentType("text/html;charset=UTF-8") }
@@ -29,7 +29,7 @@ class CertificateGenerationServiceApplicationTests {
     }
 
     @Test
-    fun modelGenerateCOSE() {
+    fun generate() {
         val mvcResult = mockMvc.post("/generate") {
             contentType = MediaType.APPLICATION_FORM_URLENCODED
             param("vaccinationData", SampleData.recovery)
@@ -41,7 +41,23 @@ class CertificateGenerationServiceApplicationTests {
             }
         }.andReturn()
         val cardViewModels = extractCardViewModels(mvcResult)
-        assertNotNull(cardViewModels.find { it.title == "COSE" })
+        assertNotNull(cardViewModels.find { it.title == "User Input" })
+    }
+
+    @Test
+    fun testsuite() {
+        val mvcResult = mockMvc.post("/testsuite"){
+        }.andExpect {
+            status { isOk() }
+            content { contentType("text/html;charset=UTF-8") }
+            model {
+                attributeExists("cardViewModels")
+            }
+        }.andReturn()
+        val cardViewModels = extractCardViewModels(mvcResult)
+        assertNotNull(cardViewModels.find { it.title == "Recovery statement" })
+        assertNotNull(cardViewModels.find { it.title == "Vaccination statement" })
+        assertNotNull(cardViewModels.find { it.title == "Test statement" })
     }
 
     private fun extractCardViewModels(mvcResult: MvcResult): MutableList<CardViewModel> {

@@ -12,24 +12,21 @@ class CborViewAdapter(
     private val qrCodeService: TwoDimCodeService
 ) {
 
-    fun process(input: String): CardViewModel {
+    fun process(title: String, input: String): CardViewModel {
         val result =
             cborProcessingChain.process(Json { isLenient = true; ignoreUnknownKeys = true }.decodeFromString(input))
         val qrCode = qrCodeService.encode(result.prefixedEncodedCompressedCose)
         return CardViewModel(
-            "COSE",
+            title,
             input = input,
             base64Items = listOf(
-                Base64Item("CBOR (Base45)", base45Service.encode(result.cbor)),
                 Base64Item("CBOR (Hex)", result.cbor.toHexString()),
-                Base64Item("COSE (Base45)", base45Service.encode(result.cose)),
                 Base64Item("COSE (Hex)", result.cose.toHexString()),
                 Base64Item("Compressed COSE (Base45)", base45Service.encode(result.compressedCose)),
-                Base64Item("Compressed COSE (Hex)", result.compressedCose.toHexString()),
-                Base64Item("Prefixed Compressed COSE", result.prefixedEncodedCompressedCose)
+                Base64Item("Prefixed Compressed COSE (Base45)", result.prefixedEncodedCompressedCose)
             ),
             codeResources = listOf(
-                CodeResource("QR code based on prefixed compressed COSE", qrCode),
+                CodeResource("Valid QR Code", qrCode),
             )
         )
     }
