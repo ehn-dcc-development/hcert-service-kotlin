@@ -37,7 +37,6 @@ class CertificateGenerationServiceApplicationTests {
             status { isOk() }
             content { contentType("text/html;charset=UTF-8") }
             model {
-                attributeExists("vaccinationData")
                 attributeExists("cardViewModels")
             }
         }.andReturn()

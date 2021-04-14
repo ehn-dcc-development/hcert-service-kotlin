@@ -5,16 +5,13 @@
     <meta charset="UTF-8">
     <title>eHealth Certificate Service</title>
 </head>
+
 <body class="uk-flex-wrap uk-background-muted">
 <div class="uk-flex-wrap uk-padding">
-    <div class="uk-card uk-margin uk-default uk-card-body uk-background-default uk-flex-wrap">
-        <h2 class="">Submitted Data</h2>
-        <div style="word-wrap: break-word"><h3 class="uk-heading-bullet">Input</h3>[[${vaccinationData}]]</div>
-    </div>
-
     <div th:each="cvm : ${cardViewModels}"
          class="uk-card uk-margin uk-default uk-card-body uk-background-default uk-flex-wrap">
         <h2 class="">[[${cvm.title}]]</h2>
+        <div style="word-wrap: break-word"><h3 class="uk-heading-bullet">Input</h3>[[${cvm.input}]]</div>
         <div th:each="base64Item: ${cvm.base64Items}" class="uk-margin" style="word-wrap: break-word"><h3
                 class="uk-heading-bullet">[[${base64Item.title}]] ([[${base64Item.value.length}]] chars):</h3>
             [[${base64Item.value}]]
@@ -24,7 +21,6 @@
             <img th:src="'data:image/png;base64,'+${codeResource.image}" alt="Code Missing"/>
         </div>
     </div>
-
 </div>
 </body>
 </html>

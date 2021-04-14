@@ -13,10 +13,12 @@ class CborViewAdapter(
 ) {
 
     fun process(input: String): CardViewModel {
-        val result = cborProcessingChain.process(Json { isLenient = true; ignoreUnknownKeys = true }.decodeFromString(input))
+        val result =
+            cborProcessingChain.process(Json { isLenient = true; ignoreUnknownKeys = true }.decodeFromString(input))
         val qrCode = qrCodeService.encode(result.prefixedEncodedCompressedCose)
         return CardViewModel(
             "COSE",
+            input = input,
             base64Items = listOf(
                 Base64Item("CBOR (Base45)", base45Service.encode(result.cbor)),
                 Base64Item("CBOR (Hex)", result.cbor.toHexString()),

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.6.18/dist/css/uikit.min.css"/>
-<script src="https://cdn.jsdelivr.net/npm/uikit@3.6.18/dist/js/uikit.min.js"></script>
 <head>
     <meta charset="UTF-8">
     <title>eHealth Certificate Service</title>
@@ -47,7 +46,7 @@
                 <form action="/certservice/generate" method="post">
                     <label class="uk-form-label" for="vaccinationData">Input Data</label><br/>
                     <textarea class="uk-textarea" id="vaccinationData" name="vaccinationData" rows="25" cols="50"
-                              required></textarea><br/>
+                              required>[[${vaccinatedJson}]]</textarea><br/>
                     <input class="uk-button-default uk-margin uk-padding-small uk-align-center" value="Generate COSE"
                            type="submit">
                 </form>
