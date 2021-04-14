@@ -6,6 +6,8 @@ import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RequestParam
 
 
@@ -34,7 +36,7 @@ class CertificateGenerationController(
         return "vaccinationCertificate"
     }
 
-    @PostMapping("/testsuite")
+    @RequestMapping("/testsuite", method = [RequestMethod.GET, RequestMethod.POST])
     fun testSuite(model: Model): String {
         log.info("testsuite called")
         val cardViewModels = mutableListOf<CardViewModel>()
