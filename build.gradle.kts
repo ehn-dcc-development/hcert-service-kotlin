@@ -3,14 +3,22 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
 	id("org.springframework.boot") version "2.4.4"
 	id("io.spring.dependency-management") version "1.0.11.RELEASE"
+	id("idea")
 	kotlin("jvm") version "1.4.31"
 	kotlin("plugin.spring") version "1.4.31"
 	kotlin("plugin.serialization") version "1.4.31"
 }
 
 group = "ehn.techiop.hcert"
-version = "0.1.1-SNAPSHOT"
+version = "0.1.4-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
+
+idea {
+	module {
+		isDownloadSources = true
+		isDownloadJavadoc = true
+	}
+}
 
 repositories {
     mavenLocal()
@@ -35,7 +43,7 @@ dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
 	implementation("org.jetbrains.kotlinx:kotlinx-serialization-cbor:1.1.0")
     implementation("com.google.zxing:core:3.4.1")
-	implementation("ehn.techiop.hcert:hcert-kotlin:0.1.1-SNAPSHOT")
+	implementation("ehn.techiop.hcert:hcert-kotlin:0.1.3-SNAPSHOT")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.RequestParam
 
 
 @Controller
-class CertificateGenerationController(private val cborViewAdapter: CborViewAdapter) {
+class CertificateGenerationController(
+    private val cborViewAdapter: CborViewAdapter,
+    private val cborProcessingChainEc: CborProcessingChainAdapter
+) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -26,7 +29,7 @@ class CertificateGenerationController(private val cborViewAdapter: CborViewAdapt
     @PostMapping("/generate")
     fun generateCertificate(@RequestParam(name = "vaccinationData") input: String, model: Model): String {
         log.info("generateCertificate called")
-        val cardViewModels = listOf(cborViewAdapter.process("User Input", input))
+        val cardViewModels = listOf(cborProcessingChainEc.process("User Input", input))
         model.addAllAttributes(mapOf("cardViewModels" to cardViewModels))
         return "vaccinationCertificate"
     }
@@ -34,11 +37,10 @@ class CertificateGenerationController(private val cborViewAdapter: CborViewAdapt
     @PostMapping("/testsuite")
     fun testSuite(model: Model): String {
         log.info("testsuite called")
-        val cardViewModels = listOf(
-            cborViewAdapter.process("Recovery statement", SampleData.recovery),
-            cborViewAdapter.process("Vaccination statement", SampleData.vaccination),
-            cborViewAdapter.process("Test statement", SampleData.test)
-        )
+        val cardViewModels = mutableListOf<CardViewModel>()
+        //cborViewAdapter.process("Recovery statement", SampleData.recovery).forEach { cardViewModels.add(it) }
+        cborViewAdapter.process("Vaccination statement", SampleData.vaccination).forEach { cardViewModels.add(it) }
+        //cborViewAdapter.process("Test statement", SampleData.test).forEach { cardViewModels.add(it) }
         model.addAllAttributes(mapOf("cardViewModels" to cardViewModels))
         return "vaccinationCertificate"
     }

@@ -21,13 +21,13 @@ class CertificateIndexControllerTests {
     lateinit var mockMvc: MockMvc
 
     @Autowired
-    lateinit var cryptoService: CryptoService
+    lateinit var cryptoServiceEc: CryptoService
 
     private val URL_PREFIX = "/cert"
 
     @Test
     fun certificateAsText() {
-        val kid = cryptoService.getCborHeaders().first { it.first == HeaderKeys.KID }.second.AsString()
+        val kid = cryptoServiceEc.getCborHeaders().first { it.first == HeaderKeys.KID }.second.AsString()
         val certificate = mockMvc.get("$URL_PREFIX/$kid") {
             accept(MediaType.TEXT_PLAIN)
         }.andExpect {
@@ -43,7 +43,7 @@ class CertificateIndexControllerTests {
 
     @Test
     fun certificateAsBinary() {
-        val kid = cryptoService.getCborHeaders().first { it.first == HeaderKeys.KID }.second.AsString()
+        val kid = cryptoServiceEc.getCborHeaders().first { it.first == HeaderKeys.KID }.second.AsString()
         val certificate = mockMvc.get("$URL_PREFIX/$kid") {
             accept(MediaType.APPLICATION_OCTET_STREAM)
         }.andExpect {
