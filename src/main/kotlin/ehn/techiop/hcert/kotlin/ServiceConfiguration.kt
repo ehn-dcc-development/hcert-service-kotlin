@@ -1,26 +1,9 @@
 package ehn.techiop.hcert.kotlin
 
 import com.google.zxing.BarcodeFormat
-import ehn.techiop.hcert.kotlin.chain.Base45Service
-import ehn.techiop.hcert.kotlin.chain.CborProcessingChain
-import ehn.techiop.hcert.kotlin.chain.CborService
-import ehn.techiop.hcert.kotlin.chain.CompressorService
-import ehn.techiop.hcert.kotlin.chain.CoseService
-import ehn.techiop.hcert.kotlin.chain.CryptoService
-import ehn.techiop.hcert.kotlin.chain.DefaultBase45Service
-import ehn.techiop.hcert.kotlin.chain.DefaultCborService
-import ehn.techiop.hcert.kotlin.chain.DefaultCompressorService
-import ehn.techiop.hcert.kotlin.chain.DefaultCoseService
-import ehn.techiop.hcert.kotlin.chain.DefaultValSuiteService
-import ehn.techiop.hcert.kotlin.chain.FaultyBase45Service
-import ehn.techiop.hcert.kotlin.chain.FaultyCborService
-import ehn.techiop.hcert.kotlin.chain.FaultyCompressorService
-import ehn.techiop.hcert.kotlin.chain.FaultyCoseService
-import ehn.techiop.hcert.kotlin.chain.FaultyValSuiteService
-import ehn.techiop.hcert.kotlin.chain.RandomEcKeyCryptoService
-import ehn.techiop.hcert.kotlin.chain.RandomRsaKeyCryptoService
-import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
-import ehn.techiop.hcert.kotlin.chain.ValSuiteService
+import ehn.techiop.hcert.kotlin.chain.*
+import ehn.techiop.hcert.kotlin.chain.impl.*
+import ehn.techiop.hcert.kotlin.chain.faults.*
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -29,7 +12,7 @@ class ServiceConfiguration {
 
     @Bean
     fun qrCodeService(): TwoDimCodeService {
-        return TwoDimCodeService(350, BarcodeFormat.QR_CODE)
+        return DefaultTwoDimCodeService(350, BarcodeFormat.QR_CODE)
     }
 
     @Bean

@@ -2,15 +2,15 @@ package ehn.techiop.hcert.kotlin
 
 import com.google.zxing.BarcodeFormat
 import ehn.techiop.hcert.kotlin.chain.CborProcessingChain
-import ehn.techiop.hcert.kotlin.chain.DefaultBase45Service
-import ehn.techiop.hcert.kotlin.chain.DefaultCborService
-import ehn.techiop.hcert.kotlin.chain.DefaultCompressorService
-import ehn.techiop.hcert.kotlin.chain.DefaultCoseService
-import ehn.techiop.hcert.kotlin.chain.DefaultValSuiteService
-import ehn.techiop.hcert.kotlin.chain.RandomEcKeyCryptoService
 import ehn.techiop.hcert.kotlin.chain.SampleData
-import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.VaccinationData
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultBase45Service
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultCborService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultCompressorService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultCoseService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultTwoDimCodeService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultValSuiteService
+import ehn.techiop.hcert.kotlin.chain.impl.RandomEcKeyCryptoService
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.hamcrest.CoreMatchers.equalTo
@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test
 class CoseProcessStrategyTests {
 
     private val title = "CoseProcessStrategyTest"
-    private val qrCodeService = TwoDimCodeService(350, BarcodeFormat.QR_CODE)
+    private val qrCodeService = DefaultTwoDimCodeService(350, BarcodeFormat.QR_CODE)
     private val cryptoService = RandomEcKeyCryptoService()
     private val cborService = DefaultCborService()
     private val coseService = DefaultCoseService(cryptoService)

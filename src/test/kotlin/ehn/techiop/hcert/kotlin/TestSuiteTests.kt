@@ -2,30 +2,26 @@ package ehn.techiop.hcert.kotlin
 
 import com.google.zxing.BarcodeFormat
 import ehn.techiop.hcert.kotlin.chain.CborProcessingChain
-import ehn.techiop.hcert.kotlin.chain.DefaultBase45Service
-import ehn.techiop.hcert.kotlin.chain.DefaultCborService
-import ehn.techiop.hcert.kotlin.chain.DefaultCompressorService
-import ehn.techiop.hcert.kotlin.chain.DefaultCoseService
-import ehn.techiop.hcert.kotlin.chain.DefaultValSuiteService
-import ehn.techiop.hcert.kotlin.chain.FaultyBase45Service
-import ehn.techiop.hcert.kotlin.chain.FaultyCborService
-import ehn.techiop.hcert.kotlin.chain.FaultyCompressorService
-import ehn.techiop.hcert.kotlin.chain.FaultyCoseService
-import ehn.techiop.hcert.kotlin.chain.FaultyValSuiteService
-import ehn.techiop.hcert.kotlin.chain.RandomEcKeyCryptoService
 import ehn.techiop.hcert.kotlin.chain.SampleData
-import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.VaccinationData
 import ehn.techiop.hcert.kotlin.chain.VerificationResult
+import ehn.techiop.hcert.kotlin.chain.faults.FaultyBase45Service
+import ehn.techiop.hcert.kotlin.chain.faults.FaultyCborService
+import ehn.techiop.hcert.kotlin.chain.faults.FaultyCompressorService
+import ehn.techiop.hcert.kotlin.chain.faults.FaultyCoseService
+import ehn.techiop.hcert.kotlin.chain.faults.FaultyValSuiteService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultBase45Service
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultCborService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultCompressorService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultCoseService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultTwoDimCodeService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultValSuiteService
+import ehn.techiop.hcert.kotlin.chain.impl.RandomEcKeyCryptoService
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.not
-import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.allOf
-import org.hamcrest.Matchers.greaterThan
-import org.hamcrest.Matchers.lessThan
 import org.junit.jupiter.api.Test
 
 class TestSuiteTests {
@@ -37,7 +33,7 @@ class TestSuiteTests {
     private val titleFaultyValSuite = "FaultyValSuite"
     private val titleFaultyCose = "FaultyCose"
     private val titleFaultyCbor = "FaultyCbor"
-    private val qrCodeService = TwoDimCodeService(350, BarcodeFormat.QR_CODE)
+    private val qrCodeService = DefaultTwoDimCodeService(350, BarcodeFormat.QR_CODE)
     private val cryptoService = RandomEcKeyCryptoService()
     private val cborService = DefaultCborService()
     private val coseService = DefaultCoseService(cryptoService)
@@ -149,29 +145,14 @@ class TestSuiteTests {
             ?: throw AssertionError()
     }
 
-    private fun isAround(input: Int) = allOf(greaterThan(input.div(10) * 9), lessThan(input.div(10) * 11))
-
-    private fun assertSuccess(input: String, jsonInput: String) {
-        val verificationResult = VerificationResult()
-        val vaccinationData = chainCorrect.verify(input, verificationResult)
-        val decodedFromInput =
-            Json { isLenient = true; ignoreUnknownKeys = true }.decodeFromString<VaccinationData>(jsonInput)
-        assertThat(vaccinationData, equalTo(decodedFromInput))
-        assertThat(verificationResult.base45Decoded, equalTo(true))
-        assertThat(verificationResult.cborDecoded, equalTo(true))
-        //assertThat(verificationResult.coseVerified, equalTo(true))
-        assertThat(verificationResult.zlibDecoded, equalTo(true))
-        assertThat(verificationResult.valSuitePrefix, notNullValue())
-    }
-
     private fun assertVerification(
-        input: String,
+        chainOutput: String,
         jsonInput: String,
-        expectData: Boolean,
+        expectDataToMatch: Boolean,
         expectedResult: VerificationResult
     ) {
         val verificationResult = VerificationResult()
-        val vaccinationData = chainCorrect.verify(input, verificationResult)
+        val vaccinationData = chainCorrect.verify(chainOutput, verificationResult)
         val decodedFromInput =
             Json { isLenient = true; ignoreUnknownKeys = true }.decodeFromString<VaccinationData>(jsonInput)
         assertThat(verificationResult.base45Decoded, equalTo(expectedResult.base45Decoded))
@@ -179,7 +160,7 @@ class TestSuiteTests {
         assertThat(verificationResult.coseVerified, equalTo(expectedResult.coseVerified))
         assertThat(verificationResult.zlibDecoded, equalTo(expectedResult.zlibDecoded))
         assertThat(verificationResult.valSuitePrefix, equalTo(expectedResult.valSuitePrefix))
-        if (expectData) {
+        if (expectDataToMatch) {
             assertThat(vaccinationData, equalTo(decodedFromInput))
         } else {
             assertThat(vaccinationData, not(equalTo(decodedFromInput)))
