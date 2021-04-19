@@ -28,11 +28,11 @@ class CoseProcessStrategyTests {
     private val cryptoService = RandomEcKeyCryptoService()
     private val cborService = DefaultCborService()
     private val coseService = DefaultCoseService(cryptoService)
-    private val valSuiteService = DefaultContextIdentifierService()
+    private val contextIdentifierService = DefaultContextIdentifierService()
     private val compressorService = DefaultCompressorService()
     private val base45Service = DefaultBase45Service()
     private val processingChain =
-        CborProcessingChain(cborService, coseService, valSuiteService, compressorService, base45Service)
+        CborProcessingChain(cborService, coseService, contextIdentifierService, compressorService, base45Service)
     private val processingChainAdapter = CborProcessingChainAdapter(title, processingChain, qrCodeService)
 
     @Test
