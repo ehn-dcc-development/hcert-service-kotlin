@@ -9,7 +9,7 @@ import ehn.techiop.hcert.kotlin.chain.impl.DefaultCborService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCompressorService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCoseService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultTwoDimCodeService
-import ehn.techiop.hcert.kotlin.chain.impl.DefaultValSuiteService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultContextIdentifierService
 import ehn.techiop.hcert.kotlin.chain.impl.RandomEcKeyCryptoService
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -28,7 +28,7 @@ class CoseProcessStrategyTests {
     private val cryptoService = RandomEcKeyCryptoService()
     private val cborService = DefaultCborService()
     private val coseService = DefaultCoseService(cryptoService)
-    private val valSuiteService = DefaultValSuiteService()
+    private val valSuiteService = DefaultContextIdentifierService()
     private val compressorService = DefaultCompressorService()
     private val base45Service = DefaultBase45Service()
     private val processingChain =

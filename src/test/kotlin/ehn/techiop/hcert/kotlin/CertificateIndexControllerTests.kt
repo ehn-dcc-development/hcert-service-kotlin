@@ -12,6 +12,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import java.security.cert.CertificateFactory
+import java.util.Base64
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -27,8 +28,9 @@ class CertificateIndexControllerTests {
 
     @Test
     fun certificateAsText() {
-        val kid = cryptoServiceEc.getCborHeaders().first { it.first == HeaderKeys.KID }.second.AsString()
-        val certificate = mockMvc.get("$URL_PREFIX/$kid") {
+        val kid = cryptoServiceEc.getCborHeaders().first { it.first == HeaderKeys.KID }.second.GetByteString()
+        val key = Base64.getUrlEncoder().encodeToString(kid)
+        val certificate = mockMvc.get("$URL_PREFIX/$key") {
             accept(MediaType.TEXT_PLAIN)
         }.andExpect {
             status { isOk() }
@@ -43,8 +45,9 @@ class CertificateIndexControllerTests {
 
     @Test
     fun certificateAsBinary() {
-        val kid = cryptoServiceEc.getCborHeaders().first { it.first == HeaderKeys.KID }.second.AsString()
-        val certificate = mockMvc.get("$URL_PREFIX/$kid") {
+        val kid = cryptoServiceEc.getCborHeaders().first { it.first == HeaderKeys.KID }.second.GetByteString()
+        val key = Base64.getUrlEncoder().encodeToString(kid)
+        val certificate = mockMvc.get("$URL_PREFIX/$key") {
             accept(MediaType.APPLICATION_OCTET_STREAM)
         }.andExpect {
             status { isOk() }

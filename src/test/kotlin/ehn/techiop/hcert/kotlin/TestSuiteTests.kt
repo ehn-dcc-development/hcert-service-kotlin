@@ -9,13 +9,13 @@ import ehn.techiop.hcert.kotlin.chain.faults.FaultyBase45Service
 import ehn.techiop.hcert.kotlin.chain.faults.FaultyCborService
 import ehn.techiop.hcert.kotlin.chain.faults.FaultyCompressorService
 import ehn.techiop.hcert.kotlin.chain.faults.FaultyCoseService
-import ehn.techiop.hcert.kotlin.chain.faults.FaultyValSuiteService
+import ehn.techiop.hcert.kotlin.chain.faults.FaultyContextIdentifierService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultBase45Service
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCborService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCompressorService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCoseService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultTwoDimCodeService
-import ehn.techiop.hcert.kotlin.chain.impl.DefaultValSuiteService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultContextIdentifierService
 import ehn.techiop.hcert.kotlin.chain.impl.RandomEcKeyCryptoService
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -30,14 +30,14 @@ class TestSuiteTests {
     private val titleCorrect = "Correct"
     private val titleFaultyBase45 = "FaultyBase45"
     private val titleFaultyCompressor = "FaultyCompressor"
-    private val titleFaultyValSuite = "FaultyValSuite"
+    private val titleFaultyContextIdentifier = "FaultyContextIdentifier"
     private val titleFaultyCose = "FaultyCose"
     private val titleFaultyCbor = "FaultyCbor"
     private val qrCodeService = DefaultTwoDimCodeService(350, BarcodeFormat.QR_CODE)
     private val cryptoService = RandomEcKeyCryptoService()
     private val cborService = DefaultCborService()
     private val coseService = DefaultCoseService(cryptoService)
-    private val valSuiteService = DefaultValSuiteService()
+    private val valSuiteService = DefaultContextIdentifierService()
     private val compressorService = DefaultCompressorService()
     private val base45Service = DefaultBase45Service()
     private val chainCorrect =
@@ -55,10 +55,10 @@ class TestSuiteTests {
             CborProcessingChain(cborService, coseService, valSuiteService, FaultyCompressorService(), base45Service),
             qrCodeService
         )
-    private val adapterFaultyValSuite =
+    private val adapterFaultyContextIdentifier =
         CborProcessingChainAdapter(
-            titleFaultyValSuite,
-            CborProcessingChain(cborService, coseService, FaultyValSuiteService(), compressorService, base45Service),
+            titleFaultyContextIdentifier,
+            CborProcessingChain(cborService, coseService, FaultyContextIdentifierService(), compressorService, base45Service),
             qrCodeService
         )
     private val adapterFaultyCose =
@@ -84,7 +84,7 @@ class TestSuiteTests {
             adapterCorrect,
             adapterFaultyBase45,
             adapterFaultyCompressor,
-            adapterFaultyValSuite,
+            adapterFaultyContextIdentifier,
             adapterFaultyCose,
             adapterFaultyCbor
         )
@@ -100,27 +100,27 @@ class TestSuiteTests {
             input,
             true,
             VerificationResult().apply {
-                valSuitePrefix = "HC1"; base45Decoded = true; zlibDecoded = true; cborDecoded = true; coseVerified =
+                contextIdentifier = "HC1:"; base45Decoded = true; zlibDecoded = true; cborDecoded = true; coseVerified =
                 true
             })
         assertVerification(
             loadQrCodeContent(cardViewModels, titleFaultyBase45),
             input,
             false,
-            VerificationResult().apply { valSuitePrefix = "HC1" })
+            VerificationResult().apply { contextIdentifier = "HC1:" })
         assertVerification(
-            loadQrCodeContent(cardViewModels, titleFaultyValSuite),
+            loadQrCodeContent(cardViewModels, titleFaultyContextIdentifier),
             input,
             true,
             VerificationResult().apply {
-                valSuitePrefix = null; base45Decoded = true; zlibDecoded = true; cborDecoded = true; coseVerified = true
+                contextIdentifier = null; base45Decoded = true; zlibDecoded = true; cborDecoded = true; coseVerified = true
             })
         assertVerification(
             loadQrCodeContent(cardViewModels, titleFaultyCompressor),
             input,
             true,
             VerificationResult().apply {
-                valSuitePrefix = "HC1"; base45Decoded = true; zlibDecoded = true; cborDecoded = true; coseVerified =
+                contextIdentifier = "HC1:"; base45Decoded = true; zlibDecoded = true; cborDecoded = true; coseVerified =
                 true
             })
         assertVerification(
@@ -128,14 +128,14 @@ class TestSuiteTests {
             input,
             true,
             VerificationResult().apply {
-                valSuitePrefix = "HC1"; base45Decoded = true; zlibDecoded = true; cborDecoded = true
+                contextIdentifier = "HC1:"; base45Decoded = true; zlibDecoded = true; cborDecoded = true
             })
         assertVerification(
             loadQrCodeContent(cardViewModels, titleFaultyCbor),
             input,
             false,
             VerificationResult().apply {
-                valSuitePrefix = "HC1"; base45Decoded = true; zlibDecoded = true; coseVerified = true
+                contextIdentifier = "HC1:"; base45Decoded = true; zlibDecoded = true; coseVerified = true
             })
     }
 
@@ -159,7 +159,7 @@ class TestSuiteTests {
         assertThat(verificationResult.cborDecoded, equalTo(expectedResult.cborDecoded))
         assertThat(verificationResult.coseVerified, equalTo(expectedResult.coseVerified))
         assertThat(verificationResult.zlibDecoded, equalTo(expectedResult.zlibDecoded))
-        assertThat(verificationResult.valSuitePrefix, equalTo(expectedResult.valSuitePrefix))
+        assertThat(verificationResult.contextIdentifier, equalTo(expectedResult.contextIdentifier))
         if (expectDataToMatch) {
             assertThat(vaccinationData, equalTo(decodedFromInput))
         } else {

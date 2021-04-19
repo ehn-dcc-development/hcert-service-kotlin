@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
 import java.security.cert.Certificate
+import java.util.Base64
 
 
 @RestController
@@ -30,7 +31,8 @@ class CertificateIndexController(
         return ResponseEntity.ok(loadCertificate(kid).encoded)
     }
 
-    private fun loadCertificate(kid: String): Certificate {
+    private fun loadCertificate(requestKid: String): Certificate {
+        val kid = Base64.getUrlDecoder().decode(requestKid)
         for (cryptoService in cryptoServices) {
             try {
                 return cryptoService.getCertificate(kid)
@@ -38,7 +40,7 @@ class CertificateIndexController(
                 continue
             }
         }
-        throw IllegalArgumentException("kid not known: $kid")
+        throw IllegalArgumentException("kid not known: $requestKid")
     }
 
 }

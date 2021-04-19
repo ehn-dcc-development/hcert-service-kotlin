@@ -5,6 +5,7 @@ Run the service with `./gradlew bootRun`, browse it at <http://localhost:8080/ce
 ## Endpoints
 
 Get the certificate for verification at `/cert/{kid}`: Set your `Accept` to `text/plain` to get the certificate in Base64, or set it to `application/octet-stream` to get binary data.
+`{kid}` is expected to be the Base64-URL representation of the bytes from `KID` claim of the CWT.
 
 ## TODO
 

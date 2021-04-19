@@ -26,6 +26,11 @@ class ServiceConfiguration {
     }
 
     @Bean
+    fun cryptoServiceRsa3072(): CryptoService {
+        return RandomRsa3072KeyCryptoService()
+    }
+
+    @Bean
     fun cborService(): CborService {
         return DefaultCborService()
     }
@@ -46,18 +51,23 @@ class ServiceConfiguration {
     }
 
     @Bean
+    fun coseRsa3072Service(cryptoServiceRsa3072: CryptoService): CoseService {
+        return DefaultCoseService(cryptoServiceRsa3072)
+    }
+
+    @Bean
     fun faultyCoseService(cryptoServiceEc: CryptoService): CoseService {
         return FaultyCoseService(cryptoServiceEc)
     }
 
     @Bean
-    fun valSuiteService(): ValSuiteService {
-        return DefaultValSuiteService()
+    fun contextIdentifierService(): ContextIdentifierService {
+        return DefaultContextIdentifierService()
     }
 
     @Bean
-    fun faultyValSuiteService(): ValSuiteService {
-        return FaultyValSuiteService()
+    fun faultyContextIdentifierService(): ContextIdentifierService {
+        return FaultyContextIdentifierService()
     }
 
     @Bean
@@ -84,13 +94,13 @@ class ServiceConfiguration {
     fun cborProcessingChainEc(
         cborService: CborService,
         coseEcService: CoseService,
-        valSuiteService: ValSuiteService,
+        contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
     ): CborProcessingChainAdapter {
         return CborProcessingChainAdapter(
             "EC Key",
-            CborProcessingChain(cborService, coseEcService, valSuiteService, compressorService, base45Service),
+            CborProcessingChain(cborService, coseEcService, contextIdentifierService, compressorService, base45Service),
             qrCodeService()
         )
     }
@@ -99,13 +109,28 @@ class ServiceConfiguration {
     fun cborProcessingChainRsa(
         cborService: CborService,
         coseRsaService: CoseService,
-        valSuiteService: ValSuiteService,
+        contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
     ): CborProcessingChainAdapter {
         return CborProcessingChainAdapter(
-            "RSA Key",
-            CborProcessingChain(cborService, coseRsaService, valSuiteService, compressorService, base45Service),
+            "RSA 2048 Key",
+            CborProcessingChain(cborService, coseRsaService, contextIdentifierService, compressorService, base45Service),
+            qrCodeService()
+        )
+    }
+
+    @Bean
+    fun cborProcessingChainRsa3072(
+        cborService: CborService,
+        coseRsa3072Service: CoseService,
+        contextIdentifierService: ContextIdentifierService,
+        compressorService: CompressorService,
+        base45Service: Base45Service
+    ): CborProcessingChainAdapter {
+        return CborProcessingChainAdapter(
+            "RSA 3072 Key",
+            CborProcessingChain(cborService, coseRsa3072Service, contextIdentifierService, compressorService, base45Service),
             qrCodeService()
         )
     }
@@ -114,13 +139,13 @@ class ServiceConfiguration {
     fun cborProcessingChainFaultyCbor(
         faultyCborService: CborService,
         coseEcService: CoseService,
-        valSuiteService: ValSuiteService,
+        contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
     ): CborProcessingChainAdapter {
         return CborProcessingChainAdapter(
             "Faulty CBOR",
-            CborProcessingChain(faultyCborService, coseEcService, valSuiteService, compressorService, base45Service),
+            CborProcessingChain(faultyCborService, coseEcService, contextIdentifierService, compressorService, base45Service),
             qrCodeService()
         )
     }
@@ -129,13 +154,13 @@ class ServiceConfiguration {
     fun cborProcessingChainFaultyCose(
         cborService: CborService,
         faultyCoseService: CoseService,
-        valSuiteService: ValSuiteService,
+        contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
     ): CborProcessingChainAdapter {
         return CborProcessingChainAdapter(
             "Faulty COSE",
-            CborProcessingChain(cborService, faultyCoseService, valSuiteService, compressorService, base45Service),
+            CborProcessingChain(cborService, faultyCoseService, contextIdentifierService, compressorService, base45Service),
             qrCodeService()
         )
     }
@@ -144,13 +169,13 @@ class ServiceConfiguration {
     fun cborProcessingChainFaultyValSuite(
         cborService: CborService,
         coseEcService: CoseService,
-        faultyValSuiteService: ValSuiteService,
+        faultyContextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
     ): CborProcessingChainAdapter {
         return CborProcessingChainAdapter(
             "Faulty ValSuite",
-            CborProcessingChain(cborService, coseEcService, faultyValSuiteService, compressorService, base45Service),
+            CborProcessingChain(cborService, coseEcService, faultyContextIdentifierService, compressorService, base45Service),
             qrCodeService()
         )
     }
@@ -159,13 +184,13 @@ class ServiceConfiguration {
     fun cborProcessingChainFaultyBase45(
         cborService: CborService,
         coseEcService: CoseService,
-        valSuiteService: ValSuiteService,
+        contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         faultyBase45Service: Base45Service
     ): CborProcessingChainAdapter {
         return CborProcessingChainAdapter(
             "Faulty Base45",
-            CborProcessingChain(cborService, coseEcService, valSuiteService, compressorService, faultyBase45Service),
+            CborProcessingChain(cborService, coseEcService, contextIdentifierService, compressorService, faultyBase45Service),
             qrCodeService()
         )
     }
@@ -174,13 +199,13 @@ class ServiceConfiguration {
     fun cborProcessingChainFaultyCompressor(
         cborService: CborService,
         coseEcService: CoseService,
-        valSuiteService: ValSuiteService,
+        contextIdentifierService: ContextIdentifierService,
         faultyCompressorService: CompressorService,
         base45Service: Base45Service
     ): CborProcessingChainAdapter {
         return CborProcessingChainAdapter(
             "Faulty Compressor",
-            CborProcessingChain(cborService, coseEcService, valSuiteService, faultyCompressorService, base45Service),
+            CborProcessingChain(cborService, coseEcService, contextIdentifierService, faultyCompressorService, base45Service),
             qrCodeService()
         )
     }
