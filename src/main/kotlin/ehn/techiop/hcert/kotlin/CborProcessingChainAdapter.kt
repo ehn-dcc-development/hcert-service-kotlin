@@ -1,10 +1,10 @@
 package ehn.techiop.hcert.kotlin
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import ehn.techiop.hcert.data.DigitalGreenCertificate
 import ehn.techiop.hcert.kotlin.chain.CborProcessingChain
 import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultBase45Service
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 
 class CborProcessingChainAdapter(
     private val title: String,
@@ -15,8 +15,7 @@ class CborProcessingChainAdapter(
     private val base45Service = DefaultBase45Service()
 
     fun process(superTitle: String, input: String): CardViewModel {
-        val result =
-            cborProcessingChain.process(Json { isLenient = true; ignoreUnknownKeys = true }.decodeFromString(input))
+        val result = cborProcessingChain.process(ObjectMapper().readValue(input, DigitalGreenCertificate::class.java))
         val qrCode = qrCodeService.encode(result.prefixedEncodedCompressedCose)
         return CardViewModel(
             "$superTitle: $title",

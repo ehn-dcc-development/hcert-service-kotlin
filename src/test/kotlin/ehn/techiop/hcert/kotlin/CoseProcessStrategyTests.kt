@@ -1,18 +1,17 @@
 package ehn.techiop.hcert.kotlin
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.zxing.BarcodeFormat
+import ehn.techiop.hcert.data.DigitalGreenCertificate
 import ehn.techiop.hcert.kotlin.chain.CborProcessingChain
 import ehn.techiop.hcert.kotlin.chain.SampleData
-import ehn.techiop.hcert.kotlin.chain.VaccinationData
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultBase45Service
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCborService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCompressorService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultContextIdentifierService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCoseService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultTwoDimCodeService
-import ehn.techiop.hcert.kotlin.chain.impl.DefaultContextIdentifierService
 import ehn.techiop.hcert.kotlin.chain.impl.RandomEcKeyCryptoService
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.startsWith
 import org.hamcrest.MatcherAssert.assertThat
@@ -40,12 +39,12 @@ class CoseProcessStrategyTests {
         val cardViewModel = processingChainAdapter.process(title, SampleData.recovery)
 
         assertThat(cardViewModel.title, startsWith(title))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Hex)" }?.value?.length, isAround(562))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Hex)" }?.value?.length, isAround(742))
+        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Hex)" }?.value?.length, isAround(440))
+        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Hex)" }?.value?.length, isAround(610))
 
         val prefixedCompressedCose =
             cardViewModel.base64Items.find { it.title.startsWith("Prefixed Compressed COSE") }?.value
-        assertThat(prefixedCompressedCose?.length, isAround(549))
+        assertThat(prefixedCompressedCose?.length, isAround(471))
         if (prefixedCompressedCose == null) throw AssertionError()
         assertPlain(prefixedCompressedCose, SampleData.recovery)
     }
@@ -55,12 +54,12 @@ class CoseProcessStrategyTests {
         val cardViewModel = processingChainAdapter.process(title, SampleData.vaccination)
 
         assertThat(cardViewModel.title, startsWith(title))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Hex)" }?.value?.length, isAround(1086))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Hex)" }?.value?.length, isAround(1266))
+        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Hex)" }?.value?.length, isAround(966))
+        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Hex)" }?.value?.length, isAround(1138))
 
         val prefixedCompressedCose =
             cardViewModel.base64Items.find { it.title.startsWith("Prefixed Compressed COSE") }?.value
-        assertThat(prefixedCompressedCose?.length, isAround(730))
+        assertThat(prefixedCompressedCose?.length, isAround(657))
         if (prefixedCompressedCose == null) throw AssertionError()
         assertPlain(prefixedCompressedCose, SampleData.vaccination)
     }
@@ -70,12 +69,12 @@ class CoseProcessStrategyTests {
         val cardViewModel = processingChainAdapter.process(title, SampleData.test)
 
         assertThat(cardViewModel.title, startsWith(title))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Hex)" }?.value?.length, isAround(872))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Hex)" }?.value?.length, isAround(1052))
+        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Hex)" }?.value?.length, isAround(664))
+        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Hex)" }?.value?.length, isAround(836))
 
         val prefixedCompressedCose =
             cardViewModel.base64Items.find { it.title.startsWith("Prefixed Compressed COSE") }?.value
-        assertThat(prefixedCompressedCose?.length, isAround(691))
+        assertThat(prefixedCompressedCose?.length, isAround(604))
         if (prefixedCompressedCose == null) throw AssertionError()
         assertPlain(prefixedCompressedCose, SampleData.test)
     }
@@ -84,8 +83,7 @@ class CoseProcessStrategyTests {
 
     private fun assertPlain(input: String, jsonInput: String) {
         val vaccinationData = processingChain.verify(input)
-        val decodedFromInput =
-            Json { isLenient = true; ignoreUnknownKeys = true }.decodeFromString<VaccinationData>(jsonInput)
+        val decodedFromInput = ObjectMapper().readValue(jsonInput, DigitalGreenCertificate::class.java)
         assertThat(vaccinationData, equalTo(decodedFromInput))
     }
 
