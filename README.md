@@ -1,6 +1,6 @@
 # Electronic Health Certificate Service Kotlin
 
-Run the service with `./gradlew bootRun`, browse it at <http://localhost:8080/certservice>, fill in some data (use the provided data!) and click on "Generate COSE" to view the result.
+Run the service with `./gradlew bootRun`, browse it at <http://localhost:8080/ehn>, fill in some data (use the provided data!) and click on "Generate COSE" to view the result. This service is also deployed at <https://dgc.a-sit.at/ehn>.
 
 ## Endpoints
 

@@ -43,7 +43,7 @@
         <h2 class="">Certificate Generation</h2>
         <div uk-grid>
             <div>
-                <form action="/certservice/generate" method="post">
+                <form action="/ehn/generate" method="post">
                     <label class="uk-form-label" for="vaccinationData">Input Data</label><br/>
                     <textarea class="uk-textarea" id="vaccinationData" name="vaccinationData" rows="25" cols="50"
                               required>[[${vaccinatedJson}]]</textarea><br/>
@@ -58,7 +58,7 @@
         <h2 class="">Test Suite</h2>
         <div uk-grid>
             <div>
-                <form action="/certservice/testsuite" method="post">
+                <form action="/ehn/testsuite" method="post">
                     <input class="uk-button-default uk-margin uk-padding-small uk-align-center" value="Generate Test Suite"
                            type="submit">
                 </form>

@@ -26,6 +26,11 @@ class ServiceConfiguration {
     }
 
     @Bean
+    fun cryptoServiceRsa3072(): CryptoService {
+        return RandomRsaKeyCryptoService(3072)
+    }
+
+    @Bean
     fun cborService(): CborService {
         return DefaultCborService()
     }
@@ -102,7 +107,7 @@ class ServiceConfiguration {
             "RSA 3072 Key",
             CborProcessingChain(
                 cborService,
-                DefaultCoseService(RandomRsaKeyCryptoService(3072)),
+                DefaultCoseService(cryptoServiceRsa3072()),
                 contextIdentifierService,
                 compressorService,
                 base45Service
