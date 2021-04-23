@@ -3,6 +3,8 @@ package ehn.techiop.hcert.kotlin
 import COSE.HeaderKeys
 import ehn.techiop.hcert.kotlin.chain.CryptoService
 import ehn.techiop.hcert.kotlin.chain.fromBase64
+import ehn.techiop.hcert.kotlin.chain.impl.PrefilledCertificateRepository
+import ehn.techiop.hcert.kotlin.chain.impl.TrustListCertificateRepository
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,6 +25,9 @@ class CertificateIndexControllerTests {
 
     @Autowired
     lateinit var cryptoServiceEc: CryptoService
+
+    @Autowired
+    lateinit var cryptoServiceTrustList: CryptoService
 
     private val URL_PREFIX = "/cert"
 
@@ -60,6 +65,21 @@ class CertificateIndexControllerTests {
         assertNotNull(parsedCertificate)
     }
 
+    @Test
+    fun trustList() {
+        val trustListEncoded = mockMvc.get("$URL_PREFIX/list") {
+            accept(MediaType.APPLICATION_OCTET_STREAM)
+        }.andExpect {
+            status { isOk() }
+        }.andReturn().response.contentAsByteArray
+
+        val repository = TrustListCertificateRepository(
+            trustListEncoded,
+            PrefilledCertificateRepository(cryptoServiceTrustList.getCertificate())
+        )
+
+        assertNotNull(repository)
+    }
 }
 
 

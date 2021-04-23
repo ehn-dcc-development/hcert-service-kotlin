@@ -2,20 +2,20 @@ package ehn.techiop.hcert.kotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import ehn.techiop.hcert.data.DigitalGreenCertificate
-import ehn.techiop.hcert.kotlin.chain.CborProcessingChain
+import ehn.techiop.hcert.kotlin.chain.Chain
 import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultBase45Service
 
-class CborProcessingChainAdapter(
+class ChainAdapter(
     private val title: String,
-    private val cborProcessingChain: CborProcessingChain,
+    private val chain: Chain,
     private val qrCodeService: TwoDimCodeService
 ) {
 
     private val base45Service = DefaultBase45Service()
 
     fun process(superTitle: String, input: String): CardViewModel {
-        val result = cborProcessingChain.process(ObjectMapper().readValue(input, DigitalGreenCertificate::class.java))
+        val result = chain.process(ObjectMapper().readValue(input, DigitalGreenCertificate::class.java))
         val qrCode = qrCodeService.encode(result.prefixedEncodedCompressedCose)
         return CardViewModel(
             "$superTitle: $title",
@@ -31,6 +31,11 @@ class CborProcessingChainAdapter(
             )
         )
     }
+
+    fun processSingle(input: String) =
+        chain.process(
+            ObjectMapper().readValue(input, DigitalGreenCertificate::class.java)
+        ).prefixedEncodedCompressedCose
 
 }
 

@@ -1,14 +1,48 @@
 package ehn.techiop.hcert.kotlin
 
 import com.google.zxing.BarcodeFormat
-import ehn.techiop.hcert.kotlin.chain.*
-import ehn.techiop.hcert.kotlin.chain.faults.*
-import ehn.techiop.hcert.kotlin.chain.impl.*
+import ehn.techiop.hcert.kotlin.chain.Base45Service
+import ehn.techiop.hcert.kotlin.chain.CborService
+import ehn.techiop.hcert.kotlin.chain.Chain
+import ehn.techiop.hcert.kotlin.chain.CompressorService
+import ehn.techiop.hcert.kotlin.chain.ContextIdentifierService
+import ehn.techiop.hcert.kotlin.chain.CoseService
+import ehn.techiop.hcert.kotlin.chain.CryptoService
+import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
+import ehn.techiop.hcert.kotlin.chain.faults.FaultyBase45Service
+import ehn.techiop.hcert.kotlin.chain.faults.FaultyCborService
+import ehn.techiop.hcert.kotlin.chain.faults.FaultyCompressorService
+import ehn.techiop.hcert.kotlin.chain.faults.FaultyCoseService
+import ehn.techiop.hcert.kotlin.chain.faults.NonVerifiableCoseService
+import ehn.techiop.hcert.kotlin.chain.faults.NoopCompressorService
+import ehn.techiop.hcert.kotlin.chain.faults.NoopContextIdentifierService
+import ehn.techiop.hcert.kotlin.chain.faults.UnprotectedCoseService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultBase45Service
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultCborService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultCompressorService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultContextIdentifierService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultCoseService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultTwoDimCodeService
+import ehn.techiop.hcert.kotlin.chain.impl.FileBasedCryptoService
+import ehn.techiop.hcert.kotlin.chain.impl.RandomRsaKeyCryptoService
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.io.ResourceLoader
 
 @Configuration
+@EnableConfigurationProperties(ConfigurationProperties::class)
 class ServiceConfiguration {
+
+    @Autowired
+    lateinit var resourceLoader: ResourceLoader
+
+    @Autowired
+    lateinit var properties: ConfigurationProperties
+
+    private fun loadFromResource(location: String) =
+        resourceLoader.getResource(location).inputStream.readAllBytes().decodeToString()
 
     @Bean
     fun qrCodeService(): TwoDimCodeService {
@@ -16,8 +50,17 @@ class ServiceConfiguration {
     }
 
     @Bean
+    fun cryptoServiceTrustList(): CryptoService {
+        val pemEncodedKeyPair = loadFromResource(properties.trustList.ecPrivate.toString())
+        val pemEncodedCert = loadFromResource(properties.trustList.ecCert.toString())
+        return FileBasedCryptoService(pemEncodedKeyPair, pemEncodedCert)
+    }
+
+    @Bean
     fun cryptoServiceEc(): CryptoService {
-        return RandomEcKeyCryptoService()
+        val pemEncodedKeyPair = loadFromResource(properties.chain.ecPrivate.toString())
+        val pemEncodedCert = loadFromResource(properties.chain.ecCert.toString())
+        return FileBasedCryptoService(pemEncodedKeyPair, pemEncodedCert)
     }
 
     @Bean
@@ -61,31 +104,39 @@ class ServiceConfiguration {
     }
 
     @Bean
-    fun cborProcessingChainEc(
+    fun trustListServiceAdapter(
+        cryptoServiceTrustList: CryptoService,
+        cryptoServiceList: Set<CryptoService>
+    ): TrustListServiceAdapter {
+        return TrustListServiceAdapter(cryptoServiceTrustList, cryptoServiceList)
+    }
+
+    @Bean
+    fun chainEc(
         cborService: CborService,
         coseEcService: CoseService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
-    ): CborProcessingChainAdapter {
-        return CborProcessingChainAdapter(
+    ): ChainAdapter {
+        return ChainAdapter(
             "EC 256 Key",
-            CborProcessingChain(cborService, coseEcService, contextIdentifierService, compressorService, base45Service),
+            Chain(cborService, coseEcService, contextIdentifierService, compressorService, base45Service),
             qrCodeService()
         )
     }
 
     @Bean
-    fun cborProcessingChainRsa2048(
+    fun chainRsa2048(
         cborService: CborService,
         coseRsaService: CoseService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
-    ): CborProcessingChainAdapter {
-        return CborProcessingChainAdapter(
+    ): ChainAdapter {
+        return ChainAdapter(
             "RSA 2048 Key",
-            CborProcessingChain(
+            Chain(
                 cborService,
                 coseRsaService,
                 contextIdentifierService,
@@ -97,15 +148,15 @@ class ServiceConfiguration {
     }
 
     @Bean
-    fun cborProcessingChainRsa3072(
+    fun chainRsa3072(
         cborService: CborService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
-    ): CborProcessingChainAdapter {
-        return CborProcessingChainAdapter(
+    ): ChainAdapter {
+        return ChainAdapter(
             "RSA 3072 Key",
-            CborProcessingChain(
+            Chain(
                 cborService,
                 DefaultCoseService(cryptoServiceRsa3072()),
                 contextIdentifierService,
@@ -117,15 +168,15 @@ class ServiceConfiguration {
     }
 
     @Bean
-    fun cborProcessingChainFaultyCbor(
+    fun chainFaultyCbor(
         coseEcService: CoseService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
-    ): CborProcessingChainAdapter {
-        return CborProcessingChainAdapter(
+    ): ChainAdapter {
+        return ChainAdapter(
             "Faulty CBOR (expect: FAIL)",
-            CborProcessingChain(
+            Chain(
                 FaultyCborService(),
                 coseEcService,
                 contextIdentifierService,
@@ -137,15 +188,15 @@ class ServiceConfiguration {
     }
 
     @Bean
-    fun cborProcessingChainNonVerifiableCose(
+    fun chainNonVerifiableCose(
         cborService: CborService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
-    ): CborProcessingChainAdapter {
-        return CborProcessingChainAdapter(
+    ): ChainAdapter {
+        return ChainAdapter(
             "Faulty COSE (non-verifiable signature) (expect: FAIL)",
-            CborProcessingChain(
+            Chain(
                 cborService,
                 NonVerifiableCoseService(cryptoServiceEc()),
                 contextIdentifierService,
@@ -157,15 +208,15 @@ class ServiceConfiguration {
     }
 
     @Bean
-    fun cborProcessingChainUnprotectedCose(
+    fun chainUnprotectedCose(
         cborService: CborService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
-    ): CborProcessingChainAdapter {
-        return CborProcessingChainAdapter(
+    ): ChainAdapter {
+        return ChainAdapter(
             "Unprotected COSE (KID in unprotected header) (expect: GOOD)",
-            CborProcessingChain(
+            Chain(
                 cborService,
                 UnprotectedCoseService(cryptoServiceEc()),
                 contextIdentifierService,
@@ -177,15 +228,15 @@ class ServiceConfiguration {
     }
 
     @Bean
-    fun cborProcessingChainFaultyCose(
+    fun chainFaultyCose(
         cborService: CborService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
-    ): CborProcessingChainAdapter {
-        return CborProcessingChainAdapter(
+    ): ChainAdapter {
+        return ChainAdapter(
             "Faulty COSE (not a valid COSE) (expect: FAIL)",
-            CborProcessingChain(
+            Chain(
                 cborService,
                 FaultyCoseService(cryptoServiceEc()),
                 contextIdentifierService,
@@ -197,15 +248,15 @@ class ServiceConfiguration {
     }
 
     @Bean
-    fun cborProcessingChainFaultyContextIdentifier(
+    fun chainFaultyContextIdentifier(
         cborService: CborService,
         coseEcService: CoseService,
         compressorService: CompressorService,
         base45Service: Base45Service
-    ): CborProcessingChainAdapter {
-        return CborProcessingChainAdapter(
+    ): ChainAdapter {
+        return ChainAdapter(
             "Faulty ContextIdentifier (HC2:) (expect: FAIL)",
-            CborProcessingChain(
+            Chain(
                 cborService,
                 coseEcService,
                 DefaultContextIdentifierService("HC2:"),
@@ -217,15 +268,15 @@ class ServiceConfiguration {
     }
 
     @Bean
-    fun cborProcessingChainNoopContextIdentifier(
+    fun chainNoopContextIdentifier(
         cborService: CborService,
         coseEcService: CoseService,
         compressorService: CompressorService,
         base45Service: Base45Service
-    ): CborProcessingChainAdapter {
-        return CborProcessingChainAdapter(
+    ): ChainAdapter {
+        return ChainAdapter(
             "No-op ContextIdentifier (expect: GOOD)",
-            CborProcessingChain(
+            Chain(
                 cborService,
                 coseEcService,
                 NoopContextIdentifierService(),
@@ -237,15 +288,15 @@ class ServiceConfiguration {
     }
 
     @Bean
-    fun cborProcessingChainFaultyBase45(
+    fun chainFaultyBase45(
         cborService: CborService,
         coseEcService: CoseService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService
-    ): CborProcessingChainAdapter {
-        return CborProcessingChainAdapter(
+    ): ChainAdapter {
+        return ChainAdapter(
             "Faulty Base45 (expect: FAIL)",
-            CborProcessingChain(
+            Chain(
                 cborService,
                 coseEcService,
                 contextIdentifierService,
@@ -257,15 +308,15 @@ class ServiceConfiguration {
     }
 
     @Bean
-    fun cborProcessingChainFaultyCompressor(
+    fun chainFaultyCompressor(
         cborService: CborService,
         coseEcService: CoseService,
         contextIdentifierService: ContextIdentifierService,
         base45Service: Base45Service
-    ): CborProcessingChainAdapter {
-        return CborProcessingChainAdapter(
+    ): ChainAdapter {
+        return ChainAdapter(
             "Faulty Compressor (expect: FAIL)",
-            CborProcessingChain(
+            Chain(
                 cborService,
                 coseEcService,
                 contextIdentifierService,
@@ -277,15 +328,15 @@ class ServiceConfiguration {
     }
 
     @Bean
-    fun cborProcessingChainNoopCompressor(
+    fun chainNoopCompressor(
         cborService: CborService,
         coseEcService: CoseService,
         contextIdentifierService: ContextIdentifierService,
         base45Service: Base45Service
-    ): CborProcessingChainAdapter {
-        return CborProcessingChainAdapter(
+    ): ChainAdapter {
+        return ChainAdapter(
             "No-op Compressor (expect: GOOD)",
-            CborProcessingChain(
+            Chain(
                 cborService,
                 coseEcService,
                 contextIdentifierService,

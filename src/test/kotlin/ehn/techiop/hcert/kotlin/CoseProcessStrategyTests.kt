@@ -3,8 +3,9 @@ package ehn.techiop.hcert.kotlin
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.zxing.BarcodeFormat
 import ehn.techiop.hcert.data.DigitalGreenCertificate
-import ehn.techiop.hcert.kotlin.chain.CborProcessingChain
+import ehn.techiop.hcert.kotlin.chain.Chain
 import ehn.techiop.hcert.kotlin.chain.SampleData
+import ehn.techiop.hcert.kotlin.chain.VerificationResult
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultBase45Service
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCborService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCompressorService
@@ -31,8 +32,8 @@ class CoseProcessStrategyTests {
     private val compressorService = DefaultCompressorService()
     private val base45Service = DefaultBase45Service()
     private val processingChain =
-        CborProcessingChain(cborService, coseService, contextIdentifierService, compressorService, base45Service)
-    private val processingChainAdapter = CborProcessingChainAdapter(title, processingChain, qrCodeService)
+        Chain(cborService, coseService, contextIdentifierService, compressorService, base45Service)
+    private val processingChainAdapter = ChainAdapter(title, processingChain, qrCodeService)
 
     @Test
     fun recovery() {
@@ -82,7 +83,7 @@ class CoseProcessStrategyTests {
     private fun isAround(input: Int) = allOf(greaterThan(input.div(10) * 9), lessThan(input.div(10) * 11))
 
     private fun assertPlain(input: String, jsonInput: String) {
-        val vaccinationData = processingChain.verify(input)
+        val vaccinationData = processingChain.verify(input, VerificationResult())
         val decodedFromInput = ObjectMapper().readValue(jsonInput, DigitalGreenCertificate::class.java)
         assertThat(vaccinationData, equalTo(decodedFromInput))
     }

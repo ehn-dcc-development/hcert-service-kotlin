@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "ehn.techiop.hcert"
-version = "0.1.7-SNAPSHOT"
+version = "0.1.8-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 idea {
@@ -43,7 +43,7 @@ dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
 	implementation("org.jetbrains.kotlinx:kotlinx-serialization-cbor:1.1.0")
     implementation("com.google.zxing:core:3.4.1")
-	implementation("ehn.techiop.hcert:hcert-kotlin:0.1.7-SNAPSHOT")
+	implementation("ehn.techiop.hcert:hcert-kotlin:0.1.8-SNAPSHOT")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

@@ -2,6 +2,7 @@ package ehn.techiop.hcert.kotlin
 
 import ehn.techiop.hcert.kotlin.chain.SampleData
 import org.slf4j.LoggerFactory
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam
 @Controller
 class CertificateGenerationController(
     private val cborViewAdapter: CborViewAdapter,
-    private val cborProcessingChainEc: CborProcessingChainAdapter
+    private val chainEc: ChainAdapter
 ) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -31,7 +32,7 @@ class CertificateGenerationController(
     @PostMapping("/generate")
     fun generateCertificate(@RequestParam(name = "vaccinationData") input: String, model: Model): String {
         log.info("generateCertificate called")
-        val cardViewModels = listOf(cborProcessingChainEc.process("User Input", input))
+        val cardViewModels = listOf(chainEc.process("User Input", input))
         model.addAllAttributes(mapOf("cardViewModels" to cardViewModels))
         return "vaccinationCertificate"
     }
@@ -45,6 +46,24 @@ class CertificateGenerationController(
         //cborViewAdapter.process("Test statement", SampleData.test).forEach { cardViewModels.add(it) }
         model.addAllAttributes(mapOf("cardViewModels" to cardViewModels))
         return "vaccinationCertificate"
+    }
+
+    @GetMapping("/qrc/vaccination")
+    fun getQrCodeVaccination(): ResponseEntity<String> {
+        log.info("getQrCodeVaccination")
+        return ResponseEntity.ok(chainEc.processSingle(SampleData.vaccination))
+    }
+
+    @GetMapping("/qrc/recovery")
+    fun getQrCodeRecovery(): ResponseEntity<String> {
+        log.info("getQrCodeRecovery")
+        return ResponseEntity.ok(chainEc.processSingle(SampleData.recovery))
+    }
+
+    @GetMapping("/qrc/test")
+    fun getQrCodeTest(): ResponseEntity<String> {
+        log.info("getQrCodeTest")
+        return ResponseEntity.ok(chainEc.processSingle(SampleData.test))
     }
 
 }

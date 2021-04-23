@@ -1,3 +1,10 @@
 server:
   servlet:
     context-path: /ehn
+app:
+  chain:
+    ec-private: classpath:ec-chain-private.pem
+    ec-cert: classpath:ec-chain-cert.pem
+  trust-list:
+    ec-private: classpath:ec-trust-list-private.pem
+    ec-cert: classpath:ec-trust-list-cert.pem

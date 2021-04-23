@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class CborViewAdapter(
-    private val chains: Set<CborProcessingChainAdapter>,
+    private val chains: Set<ChainAdapter>,
 ) {
 
     fun process(title: String, input: String): List<CardViewModel> {
