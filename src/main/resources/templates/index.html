@@ -10,7 +10,7 @@
 <div class="uk-padding">
     <div class="uk-card uk-margin uk-default uk-card-body uk-background-default">
         <h2 class="">Input Data</h2>
-        <div class="" uk-grid>
+        <div class="uk-grid">
             <div><h3>Previously Infected</h3>
                 <pre id="data_pastInfected" th:text="${pastInfectedJson}"></pre>
 
@@ -28,10 +28,18 @@
                 </button>
             </div>
 
-            <div><h3>Tested</h3>
-                <pre id="data_tested" th:text="${testedJson}"></pre>
+            <div><h3>Tested (RAT)</h3>
+                <pre id="data_tested_rat" th:text="${testedRatJson}"></pre>
                 <button class="uk-button-default uk-margin uk-padding-small uk-align-center"
-                        onclick="document.getElementById('vaccinationData').value = document.getElementById('data_tested').textContent;">
+                        onclick="document.getElementById('vaccinationData').value = document.getElementById('data_tested_rat').textContent;">
+                    Fill in data
+                </button>
+            </div>
+
+            <div><h3>Tested (NAA)</h3>
+                <pre id="data_tested_naa" th:text="${testedNaaJson}"></pre>
+                <button class="uk-button-default uk-margin uk-padding-small uk-align-center"
+                        onclick="document.getElementById('vaccinationData').value = document.getElementById('data_tested_naa').textContent;">
                     Fill in data
                 </button>
             </div>
@@ -40,9 +48,9 @@
     </div>
 
     <div class="uk-card uk-margin uk-default uk-card-body uk-background-default uk-flex-wrap">
-        <h2 class="">Certificate Generation</h2>
-        <div uk-grid>
+        <div class="uk-grid">
             <div>
+                <h3>Certificate Generation</h3>
                 <form action="/ehn/generate" method="post">
                     <label class="uk-form-label" for="vaccinationData">Input Data</label><br/>
                     <textarea class="uk-textarea" id="vaccinationData" name="vaccinationData" rows="25" cols="50"
@@ -51,17 +59,16 @@
                            type="submit">
                 </form>
             </div>
-        </div>
-    </div>
-
-    <div class="uk-card uk-margin uk-default uk-card-body uk-background-default uk-flex-wrap">
-        <h2 class="">Test Suite</h2>
-        <div uk-grid>
             <div>
-                <form action="/ehn/testsuite" method="post">
-                    <input class="uk-button-default uk-margin uk-padding-small uk-align-center" value="Generate Test Suite"
-                           type="submit">
-                </form>
+                <h3 class="">Other links</h3>
+                <a class="uk-button-default uk-margin uk-padding-small uk-display-block" href="/ehn/testsuite">Testsuite</a><br/>
+                <a class="uk-button-default uk-margin uk-padding-small uk-display-block" href="/ehn/cert/list">Trust List (binary)</a><br/>
+                <a class="uk-button-default uk-margin uk-padding-small uk-display-block" href="/ehn/qrc/test">Sample QR code content,
+                    tested</a><br/>
+                <a class="uk-button-default uk-margin uk-padding-small uk-display-block" href="/ehn/qrc/vaccination">Sample QR code
+                    content, vaccinated</a><br/>
+                <a class="uk-button-default uk-margin uk-padding-small uk-display-block" href="/ehn/qrc/recovery">Sample QR code content,
+                    recovered</a><br/>
             </div>
         </div>
     </div>

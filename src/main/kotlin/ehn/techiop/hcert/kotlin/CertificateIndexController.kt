@@ -1,9 +1,9 @@
 package ehn.techiop.hcert.kotlin
 
 import ehn.techiop.hcert.kotlin.chain.CryptoService
-import ehn.techiop.hcert.kotlin.chain.TrustListService
+import ehn.techiop.hcert.kotlin.chain.TrustListEncodeService
 import ehn.techiop.hcert.kotlin.chain.asBase64
-import ehn.techiop.hcert.kotlin.chain.impl.PkiUtils
+import ehn.techiop.hcert.kotlin.chain.common.PkiUtils
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -41,7 +41,7 @@ class CertificateIndexController(
     private fun loadCertificate(requestKid: String): ByteArray {
         val kid = Base64.getUrlDecoder().decode(requestKid)
         return trustListServiceAdapter.cryptoServices.map { it.getCertificate() }
-            .firstOrNull { PkiUtils().calcKid(it) contentEquals kid }?.encoded
+            .firstOrNull { PkiUtils.calcKid(it) contentEquals kid }?.encoded
             ?: throw IllegalArgumentException("kid not known: $requestKid")
     }
 
@@ -49,7 +49,7 @@ class CertificateIndexController(
 
 class TrustListServiceAdapter(signingService: CryptoService, internal val cryptoServices: Set<CryptoService>) {
 
-    private val trustListService = TrustListService(signingService)
+    private val trustListService = TrustListEncodeService(signingService)
     internal val trustList = trustListService.encode(cryptoServices.map { it.getCertificate() }.toSet())
 
 }

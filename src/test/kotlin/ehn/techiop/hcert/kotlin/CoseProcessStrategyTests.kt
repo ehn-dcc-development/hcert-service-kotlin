@@ -2,7 +2,7 @@ package ehn.techiop.hcert.kotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.zxing.BarcodeFormat
-import ehn.techiop.hcert.data.DigitalGreenCertificate
+import ehn.techiop.hcert.data.Eudgc
 import ehn.techiop.hcert.kotlin.chain.Chain
 import ehn.techiop.hcert.kotlin.chain.SampleData
 import ehn.techiop.hcert.kotlin.chain.VerificationResult
@@ -19,7 +19,8 @@ import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.greaterThan
 import org.hamcrest.Matchers.lessThan
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 
 class CoseProcessStrategyTests {
 
@@ -35,57 +36,45 @@ class CoseProcessStrategyTests {
         Chain(cborService, coseService, contextIdentifierService, compressorService, base45Service)
     private val processingChainAdapter = ChainAdapter(title, processingChain, qrCodeService)
 
-    @Test
-    fun recovery() {
-        val cardViewModel = processingChainAdapter.process(title, SampleData.recovery)
+    @ParameterizedTest
+    @MethodSource("inputProvider")
+    fun success(input: TestInput) {
+        val cardViewModel = processingChainAdapter.process(title, input.input)
 
         assertThat(cardViewModel.title, startsWith(title))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Hex)" }?.value?.length, isAround(440))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Hex)" }?.value?.length, isAround(610))
+        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Hex)" }?.value?.length, isAround(input.cborSize))
+        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Hex)" }?.value?.length, isAround(input.coseSize))
 
         val prefixedCompressedCose =
             cardViewModel.base64Items.find { it.title.startsWith("Prefixed Compressed COSE") }?.value
-        assertThat(prefixedCompressedCose?.length, isAround(471))
+        assertThat(prefixedCompressedCose?.length, isAround(input.finalSize))
         if (prefixedCompressedCose == null) throw AssertionError()
-        assertPlain(prefixedCompressedCose, SampleData.recovery)
-    }
-
-    @Test
-    fun vaccination() {
-        val cardViewModel = processingChainAdapter.process(title, SampleData.vaccination)
-
-        assertThat(cardViewModel.title, startsWith(title))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Hex)" }?.value?.length, isAround(966))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Hex)" }?.value?.length, isAround(1138))
-
-        val prefixedCompressedCose =
-            cardViewModel.base64Items.find { it.title.startsWith("Prefixed Compressed COSE") }?.value
-        assertThat(prefixedCompressedCose?.length, isAround(657))
-        if (prefixedCompressedCose == null) throw AssertionError()
-        assertPlain(prefixedCompressedCose, SampleData.vaccination)
-    }
-
-    @Test
-    fun test() {
-        val cardViewModel = processingChainAdapter.process(title, SampleData.test)
-
-        assertThat(cardViewModel.title, startsWith(title))
-        assertThat(cardViewModel.base64Items.find { it.title == "CBOR (Hex)" }?.value?.length, isAround(664))
-        assertThat(cardViewModel.base64Items.find { it.title == "COSE (Hex)" }?.value?.length, isAround(836))
-
-        val prefixedCompressedCose =
-            cardViewModel.base64Items.find { it.title.startsWith("Prefixed Compressed COSE") }?.value
-        assertThat(prefixedCompressedCose?.length, isAround(604))
-        if (prefixedCompressedCose == null) throw AssertionError()
-        assertPlain(prefixedCompressedCose, SampleData.test)
+        assertPlain(prefixedCompressedCose, input.input)
     }
 
     private fun isAround(input: Int) = allOf(greaterThan(input.div(10) * 9), lessThan(input.div(10) * 11))
 
     private fun assertPlain(input: String, jsonInput: String) {
-        val vaccinationData = processingChain.verify(input, VerificationResult())
-        val decodedFromInput = ObjectMapper().readValue(jsonInput, DigitalGreenCertificate::class.java)
+        val vaccinationData = processingChain.decode(input, VerificationResult())
+        val decodedFromInput = ObjectMapper().readValue(jsonInput, Eudgc::class.java)
         assertThat(vaccinationData, equalTo(decodedFromInput))
     }
+
+
+    companion object {
+
+        @JvmStatic
+        @Suppress("unused")
+        fun inputProvider() = listOf(
+            TestInput(SampleData.testNaa, 664, 790, 606),
+            TestInput(SampleData.testRat, 582, 754, 579),
+            TestInput(SampleData.vaccination, 552, 724, 559),
+            TestInput(SampleData.recovery, 498, 668, 501)
+        )
+
+    }
+
+    data class TestInput(val input: String, val cborSize: Int, val coseSize: Int, val finalSize: Int)
+
 
 }

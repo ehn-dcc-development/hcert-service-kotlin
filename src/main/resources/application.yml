@@ -1,6 +1,8 @@
 server:
   servlet:
     context-path: /ehn
+  compression:
+    enabled: true
 app:
   chain:
     ec-private: classpath:ec-chain-private.pem

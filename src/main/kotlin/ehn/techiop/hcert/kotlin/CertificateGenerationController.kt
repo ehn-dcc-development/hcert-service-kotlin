@@ -25,7 +25,8 @@ class CertificateGenerationController(
         log.info("index called")
         model.addAttribute("pastInfectedJson", SampleData.recovery)
         model.addAttribute("vaccinatedJson", SampleData.vaccination)
-        model.addAttribute("testedJson", SampleData.test)
+        model.addAttribute("testedNaaJson", SampleData.testNaa)
+        model.addAttribute("testedRatJson", SampleData.testRat)
         return "index"
     }
 
@@ -63,7 +64,7 @@ class CertificateGenerationController(
     @GetMapping("/qrc/test")
     fun getQrCodeTest(): ResponseEntity<String> {
         log.info("getQrCodeTest")
-        return ResponseEntity.ok(chainEc.processSingle(SampleData.test))
+        return ResponseEntity.ok(chainEc.processSingle(SampleData.testNaa))
     }
 
 }
