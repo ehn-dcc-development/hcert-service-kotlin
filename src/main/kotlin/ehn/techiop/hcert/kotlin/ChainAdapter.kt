@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import ehn.techiop.hcert.data.Eudgc
 import ehn.techiop.hcert.kotlin.chain.Chain
 import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
+import ehn.techiop.hcert.kotlin.chain.asBase64
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultBase45Service
 
 class ChainAdapter(
@@ -27,7 +28,7 @@ class ChainAdapter(
                 Base64Item("Prefixed Compressed COSE (Base45)", result.step5Prefixed)
             ),
             codeResources = listOf(
-                CodeResource("QR Code", qrCode),
+                CodeResource("QR Code", qrCode.asBase64()),
             )
         )
     }
