@@ -37,7 +37,7 @@ class CertificateIndexController(
     @GetMapping(value = ["/cert/list"], produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun getTrustedCertFile(): ResponseEntity<ByteArray> {
         log.info("/cert/list called")
-        return ResponseEntity.ok(trustListServiceAdapter.trustList)
+        return ResponseEntity.ok(trustListServiceAdapter.getTrustList())
     }
 
     private fun loadCertificate(requestKid: String): ByteArray {
@@ -68,6 +68,7 @@ class TrustListServiceAdapter(signingService: CryptoService, internal val crypto
             -----END CERTIFICATE-----
         """.trimIndent().byteInputStream()
         ) as X509Certificate
-    internal val trustList = trustListService.encode(internalCertificates + certificateFromSk)
+
+    internal fun getTrustList() = trustListService.encode(internalCertificates + certificateFromSk)
 
 }
