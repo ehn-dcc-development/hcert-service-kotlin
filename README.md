@@ -23,6 +23,52 @@ EkhRcgdlVfUb
 -----END CERTIFICATE-----
 ```
 
+That trust list contains the local certificates, as well as the certificates from the [DGC Test Gatway](https://github.com/eu-digital-green-certificates/dgc-gateway) (see below for configuration).
+
+Certificates used as the document signing certificate as well as the trust list certificate are also displayed in the index page, when running this service.
+
+## Configuration
+
+Sample configuration:
+
+```yaml
+server:
+  port: 9000
+  servlet:
+    context-path: /ehn
+logging:
+  file:
+    path: log
+app:
+  chain:
+    ec-private: classpath:ec-chain-private.pem
+    ec-cert: classpath:ec-chain-cert.pem
+  trust-list:
+    ec-private: classpath:ec-trust-list-private.pem
+    ec-cert: classpath:ec-trust-list-cert.pem
+dgc:
+  gateway:
+    connector:
+      enabled: true
+      endpoint: https://test-dgcg-ws.tech.ec.europa.eu
+      proxy:
+        enabled: false
+      max-cache-age: 300
+     tls-trust-store:
+        password: dgcg-p4ssw0rd
+        path: classpath:tls-truststore.jks
+      tls-key-store:
+        alias: mtls_private_cert
+        password: dgcg-p4ssw0rd
+        path: /var/lib/ssl/mtls.jks
+      trust-anchor:
+        alias: ta_tst
+        password: dgcg-p4ssw0rd
+        path: /var/lib/ssl/ta.jks
+```
+
+See also <https://github.com/eu-digital-green-certificates/dgc-lib> for configuration of the gateway connector
+
 ## Dependencies
 
 To pull the dependency of `hcert-kotlin` (<https://github.com/ehn-digital-green-development/hcert-kotlin>), create a personal access token (read <https://docs.github.com/en/packages/guides/configuring-gradle-for-use-with-github-packages>), and add `gpr.user` and `gpr.key` in your `~/.gradle/gradle.properties`. Alternatively, install the dependency locally with `./gradlew publishToMavenLocal` in the directory `hcert-kotlin`.
@@ -36,3 +82,4 @@ This library uses the following dependencies:
  - [COSE-JAVA](https://github.com/cose-wg/cose-java), under the BSD-3-Clause License
  - [ZXing](https://github.com/zxing/zxing), under the Apache-2.0 License
  - [Jackson](https://github.com/FasterXML/jackson-module-kotlin), under the Apache-2.0 License
+ - [dgc-lib](https://github.com/eu-digital-green-certificates/dgc-lib), under the Apache-2.0 License

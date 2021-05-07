@@ -25,6 +25,7 @@ import ehn.techiop.hcert.kotlin.chain.impl.DefaultCoseService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultTwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.impl.FileBasedCryptoService
 import ehn.techiop.hcert.kotlin.chain.impl.RandomRsaKeyCryptoService
+import eu.europa.ec.dgc.gateway.connector.DgcGatewayDownloadConnector
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
@@ -106,9 +107,10 @@ class ServiceConfiguration {
     @Bean
     fun trustListServiceAdapter(
         cryptoServiceTrustList: CryptoService,
-        cryptoServiceList: Set<CryptoService>
+        cryptoServiceList: Set<CryptoService>,
+        downloadConnector: DgcGatewayDownloadConnector,
     ): TrustListServiceAdapter {
-        return TrustListServiceAdapter(cryptoServiceTrustList, cryptoServiceList)
+        return TrustListServiceAdapter(cryptoServiceTrustList, cryptoServiceList, downloadConnector)
     }
 
     @Bean

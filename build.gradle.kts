@@ -44,6 +44,7 @@ dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-serialization-cbor:1.1.0")
     implementation("com.google.zxing:core:3.4.1")
 	implementation("ehn.techiop.hcert:hcert-kotlin:0.3.0-SNAPSHOT")
+	implementation("eu.europa.ec.dgc:dgc-lib:latest")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

@@ -3,7 +3,9 @@ package ehn.techiop.hcert.kotlin
 import ehn.techiop.hcert.kotlin.chain.CryptoService
 import ehn.techiop.hcert.kotlin.chain.asBase64
 import ehn.techiop.hcert.kotlin.chain.common.PkiUtils
+import ehn.techiop.hcert.kotlin.chain.fromBase64
 import ehn.techiop.hcert.kotlin.trust.TrustListEncodeService
+import eu.europa.ec.dgc.gateway.connector.DgcGatewayDownloadConnector
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -17,7 +19,7 @@ import java.util.Base64
 
 @RestController
 class CertificateIndexController(
-    private val trustListServiceAdapter: TrustListServiceAdapter
+    private val trustListServiceAdapter: TrustListServiceAdapter,
 ) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -49,26 +51,21 @@ class CertificateIndexController(
 
 }
 
-class TrustListServiceAdapter(signingService: CryptoService, internal val cryptoServices: Set<CryptoService>) {
+class TrustListServiceAdapter(
+    signingService: CryptoService,
+    internal val cryptoServices: Set<CryptoService>,
+    private val downloadConnector: DgcGatewayDownloadConnector
+) {
 
     private val trustListService = TrustListEncodeService(signingService)
     private val internalCertificates = cryptoServices.map { it.getCertificate() }.toSet()
-    private val certificateFromSk =
-        CertificateFactory.getInstance("X.509").generateCertificate(
-            """
-            -----BEGIN CERTIFICATE-----
-            MIIBXTCCAQMCEAmvCwfrzosTNEsW+nJSjDMwCgYIKoZIzj0EAwIwMTEiMCAGA1UE
-            AwwZTmF0aW9uYWwgQ1NDQSBvZiBTbG92YWtpYTELMAkGA1UEBhMCU0swHhcNMjEw
-            NDE2MTEyNzQxWhcNMjYwMzAxMTEyNzQxWjA1MSYwJAYDVQQDDB1EU0MgbnVtYmVy
-            IHdvcmtlciBvZiBTbG92YWtpYTELMAkGA1UEBhMCU0swWTATBgcqhkjOPQIBBggq
-            hkjOPQMBBwNCAAQxjqpOs+6L3VCjYzqeaaT41JhdrhZhPuqGxu3gArWsn652jJQM
-            PpNbmuJrsC5/zUADeqwWrnXf+sRkfy/cmeSxMAoGCCqGSM49BAMCA0gAMEUCIQD8
-            sn5/VJtpKzSIIEknta6IaguYcjCNLDjwXKSKjpsZIQIgNgDQtZ7s0abo8auVg6DT
-            6jgK9xJtUWydnQcRTTgIGWI=
-            -----END CERTIFICATE-----
-        """.trimIndent().byteInputStream()
-        ) as X509Certificate
+    private val certificateFactory = CertificateFactory.getInstance("X.509")
 
-    internal fun getTrustList() = trustListService.encode(internalCertificates + certificateFromSk)
+    private fun loadGatewayCerts() =
+        downloadConnector.trustedCertificates.map {
+            certificateFactory.generateCertificate(it.rawData.fromBase64().inputStream()) as X509Certificate
+        }.toSet()
+
+    internal fun getTrustList() = trustListService.encode(internalCertificates + loadGatewayCerts())
 
 }
