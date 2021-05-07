@@ -61,14 +61,26 @@
             </div>
             <div>
                 <h3 class="">Other links</h3>
-                <a class="uk-button-default uk-margin uk-padding-small uk-display-block" href="/ehn/testsuite">Testsuite</a><br/>
-                <a class="uk-button-default uk-margin uk-padding-small uk-display-block" href="/ehn/cert/list">Trust List (binary)</a><br/>
-                <a class="uk-button-default uk-margin uk-padding-small uk-display-block" href="/ehn/qrc/test">Sample QR code content,
-                    tested</a><br/>
-                <a class="uk-button-default uk-margin uk-padding-small uk-display-block" href="/ehn/qrc/vaccination">Sample QR code
-                    content, vaccinated</a><br/>
-                <a class="uk-button-default uk-margin uk-padding-small uk-display-block" href="/ehn/qrc/recovery">Sample QR code content,
-                    recovered</a><br/>
+                <ul>
+                    <li><a class="uk-button-default uk-margin uk-padding-small uk-display-block" href="/ehn/testsuite">
+                        Testsuite</a></li>
+                    <li><a class="uk-button-default uk-margin uk-padding-small uk-display-block" href="/ehn/cert/list">
+                        Trust List (binary)</a></li>
+                    <li><a class="uk-button-default uk-margin uk-padding-small uk-display-block" href="/ehn/qrc/test">
+                        Sample QR code content, tested</a></li>
+                    <li><a class="uk-button-default uk-margin uk-padding-small uk-display-block"
+                           href="/ehn/qrc/vaccination">
+                        Sample QR code content, vaccinated</a></li>
+                    <li><a class="uk-button-default uk-margin uk-padding-small uk-display-block"
+                           href="/ehn/qrc/recovery">
+                        Sample QR code content, recovered</a></li>
+                </ul>
+            </div>
+            <div><h3>Document Signing Certificate</h3>
+                <pre id="ec_certificate" th:text="${ecCertificatePem}"></pre>
+            </div>
+            <div><h3>Trust List Signing Certificate</h3>
+                <pre id="trustlist_certificate" th:text="${trustlistCertificatePem}"></pre>
             </div>
         </div>
     </div>

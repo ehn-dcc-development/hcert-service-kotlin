@@ -1,5 +1,6 @@
 package ehn.techiop.hcert.kotlin
 
+import ehn.techiop.hcert.kotlin.chain.CryptoService
 import ehn.techiop.hcert.kotlin.chain.SampleData
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -15,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam
 @Controller
 class CertificateGenerationController(
     private val cborViewAdapter: CborViewAdapter,
-    private val chainEc: ChainAdapter
+    private val chainEc: ChainAdapter,
+    private val cryptoServiceEc: CryptoService,
+    private val cryptoServiceTrustList: CryptoService
 ) {
 
     private val log = LoggerFactory.getLogger(this::class.java)
@@ -27,6 +30,8 @@ class CertificateGenerationController(
         model.addAttribute("vaccinatedJson", SampleData.vaccination)
         model.addAttribute("testedNaaJson", SampleData.testNaa)
         model.addAttribute("testedRatJson", SampleData.testRat)
+        model.addAttribute("ecCertificatePem", cryptoServiceEc.exportCertificateAsPem())
+        model.addAttribute("trustlistCertificatePem", cryptoServiceTrustList.exportCertificateAsPem())
         return "index"
     }
 
