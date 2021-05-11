@@ -8,11 +8,13 @@ import ehn.techiop.hcert.kotlin.chain.CompressorService
 import ehn.techiop.hcert.kotlin.chain.ContextIdentifierService
 import ehn.techiop.hcert.kotlin.chain.CoseService
 import ehn.techiop.hcert.kotlin.chain.CryptoService
+import ehn.techiop.hcert.kotlin.chain.CwtService
 import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.faults.FaultyBase45Service
 import ehn.techiop.hcert.kotlin.chain.faults.FaultyCborService
 import ehn.techiop.hcert.kotlin.chain.faults.FaultyCompressorService
 import ehn.techiop.hcert.kotlin.chain.faults.FaultyCoseService
+import ehn.techiop.hcert.kotlin.chain.faults.FaultyCwtService
 import ehn.techiop.hcert.kotlin.chain.faults.NonVerifiableCoseService
 import ehn.techiop.hcert.kotlin.chain.faults.NoopCompressorService
 import ehn.techiop.hcert.kotlin.chain.faults.NoopContextIdentifierService
@@ -22,6 +24,7 @@ import ehn.techiop.hcert.kotlin.chain.impl.DefaultCborService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCompressorService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultContextIdentifierService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCoseService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultCwtService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultTwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.impl.FileBasedCryptoService
 import ehn.techiop.hcert.kotlin.chain.impl.RandomRsaKeyCryptoService
@@ -80,6 +83,11 @@ class ServiceConfiguration {
     }
 
     @Bean
+    fun cwtService(): CwtService {
+        return DefaultCwtService()
+    }
+
+    @Bean
     fun coseEcService(cryptoServiceEc: CryptoService): CoseService {
         return DefaultCoseService(cryptoServiceEc)
     }
@@ -116,6 +124,7 @@ class ServiceConfiguration {
     @Bean
     fun chainEc(
         cborService: CborService,
+        cwtService: CwtService,
         coseEcService: CoseService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
@@ -123,7 +132,7 @@ class ServiceConfiguration {
     ): ChainAdapter {
         return ChainAdapter(
             "EC 256 Key",
-            Chain(cborService, coseEcService, contextIdentifierService, compressorService, base45Service),
+            Chain(cborService, cwtService, coseEcService, contextIdentifierService, compressorService, base45Service),
             qrCodeService()
         )
     }
@@ -131,6 +140,7 @@ class ServiceConfiguration {
     @Bean
     fun chainRsa2048(
         cborService: CborService,
+        cwtService: CwtService,
         coseRsaService: CoseService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
@@ -140,6 +150,7 @@ class ServiceConfiguration {
             "RSA 2048 Key",
             Chain(
                 cborService,
+                cwtService,
                 coseRsaService,
                 contextIdentifierService,
                 compressorService,
@@ -152,6 +163,7 @@ class ServiceConfiguration {
     @Bean
     fun chainRsa3072(
         cborService: CborService,
+        cwtService: CwtService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
@@ -160,6 +172,7 @@ class ServiceConfiguration {
             "RSA 3072 Key",
             Chain(
                 cborService,
+                cwtService,
                 DefaultCoseService(cryptoServiceRsa3072()),
                 contextIdentifierService,
                 compressorService,
@@ -171,15 +184,17 @@ class ServiceConfiguration {
 
     @Bean
     fun chainFaultyCbor(
+        cborService: CborService,
         coseEcService: CoseService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
     ): ChainAdapter {
         return ChainAdapter(
-            "Faulty CBOR (expect: FAIL)",
+            "Faulty CWT (expect: FAIL)",
             Chain(
-                FaultyCborService(),
+                cborService,
+                FaultyCwtService(),
                 coseEcService,
                 contextIdentifierService,
                 compressorService,
@@ -192,6 +207,7 @@ class ServiceConfiguration {
     @Bean
     fun chainNonVerifiableCose(
         cborService: CborService,
+        cwtService: CwtService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
@@ -200,6 +216,7 @@ class ServiceConfiguration {
             "Faulty COSE (non-verifiable signature) (expect: FAIL)",
             Chain(
                 cborService,
+                cwtService,
                 NonVerifiableCoseService(cryptoServiceEc()),
                 contextIdentifierService,
                 compressorService,
@@ -212,6 +229,7 @@ class ServiceConfiguration {
     @Bean
     fun chainUnprotectedCose(
         cborService: CborService,
+        cwtService: CwtService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
@@ -220,6 +238,7 @@ class ServiceConfiguration {
             "Unprotected COSE (KID in unprotected header) (expect: GOOD)",
             Chain(
                 cborService,
+                cwtService,
                 UnprotectedCoseService(cryptoServiceEc()),
                 contextIdentifierService,
                 compressorService,
@@ -232,6 +251,7 @@ class ServiceConfiguration {
     @Bean
     fun chainFaultyCose(
         cborService: CborService,
+        cwtService: CwtService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService,
         base45Service: Base45Service
@@ -240,6 +260,7 @@ class ServiceConfiguration {
             "Faulty COSE (not a valid COSE) (expect: FAIL)",
             Chain(
                 cborService,
+                cwtService,
                 FaultyCoseService(cryptoServiceEc()),
                 contextIdentifierService,
                 compressorService,
@@ -252,6 +273,7 @@ class ServiceConfiguration {
     @Bean
     fun chainFaultyContextIdentifier(
         cborService: CborService,
+        cwtService: CwtService,
         coseEcService: CoseService,
         compressorService: CompressorService,
         base45Service: Base45Service
@@ -260,6 +282,7 @@ class ServiceConfiguration {
             "Faulty ContextIdentifier (HC2:) (expect: FAIL)",
             Chain(
                 cborService,
+                cwtService,
                 coseEcService,
                 DefaultContextIdentifierService("HC2:"),
                 compressorService,
@@ -272,6 +295,7 @@ class ServiceConfiguration {
     @Bean
     fun chainNoopContextIdentifier(
         cborService: CborService,
+        cwtService: CwtService,
         coseEcService: CoseService,
         compressorService: CompressorService,
         base45Service: Base45Service
@@ -280,6 +304,7 @@ class ServiceConfiguration {
             "No-op ContextIdentifier (expect: GOOD)",
             Chain(
                 cborService,
+                cwtService,
                 coseEcService,
                 NoopContextIdentifierService(),
                 compressorService,
@@ -292,6 +317,7 @@ class ServiceConfiguration {
     @Bean
     fun chainFaultyBase45(
         cborService: CborService,
+        cwtService: CwtService,
         coseEcService: CoseService,
         contextIdentifierService: ContextIdentifierService,
         compressorService: CompressorService
@@ -300,6 +326,7 @@ class ServiceConfiguration {
             "Faulty Base45 (expect: FAIL)",
             Chain(
                 cborService,
+                cwtService,
                 coseEcService,
                 contextIdentifierService,
                 compressorService,
@@ -312,6 +339,7 @@ class ServiceConfiguration {
     @Bean
     fun chainFaultyCompressor(
         cborService: CborService,
+        cwtService: CwtService,
         coseEcService: CoseService,
         contextIdentifierService: ContextIdentifierService,
         base45Service: Base45Service
@@ -320,6 +348,7 @@ class ServiceConfiguration {
             "Faulty Compressor (expect: FAIL)",
             Chain(
                 cborService,
+                cwtService,
                 coseEcService,
                 contextIdentifierService,
                 FaultyCompressorService(),
@@ -332,6 +361,7 @@ class ServiceConfiguration {
     @Bean
     fun chainNoopCompressor(
         cborService: CborService,
+        cwtService: CwtService,
         coseEcService: CoseService,
         contextIdentifierService: ContextIdentifierService,
         base45Service: Base45Service
@@ -340,6 +370,7 @@ class ServiceConfiguration {
             "No-op Compressor (expect: GOOD)",
             Chain(
                 cborService,
+                cwtService,
                 coseEcService,
                 contextIdentifierService,
                 NoopCompressorService(),

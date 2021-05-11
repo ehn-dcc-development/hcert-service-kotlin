@@ -11,6 +11,7 @@ import ehn.techiop.hcert.kotlin.chain.impl.DefaultCborService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCompressorService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultContextIdentifierService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCoseService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultCwtService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultTwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.impl.RandomEcKeyCryptoService
 import org.hamcrest.CoreMatchers.equalTo
@@ -28,12 +29,13 @@ class CoseProcessStrategyTests {
     private val qrCodeService = DefaultTwoDimCodeService(350, BarcodeFormat.QR_CODE)
     private val cryptoService = RandomEcKeyCryptoService()
     private val cborService = DefaultCborService()
+    private val cwtService = DefaultCwtService()
     private val coseService = DefaultCoseService(cryptoService)
     private val contextIdentifierService = DefaultContextIdentifierService()
     private val compressorService = DefaultCompressorService()
     private val base45Service = DefaultBase45Service()
     private val processingChain =
-        Chain(cborService, coseService, contextIdentifierService, compressorService, base45Service)
+        Chain(cborService, cwtService, coseService, contextIdentifierService, compressorService, base45Service)
     private val processingChainAdapter = ChainAdapter(title, processingChain, qrCodeService)
 
     @ParameterizedTest
@@ -66,8 +68,8 @@ class CoseProcessStrategyTests {
         @JvmStatic
         @Suppress("unused")
         fun inputProvider() = listOf(
-            TestInput(SampleData.testNaa, 664, 790, 606),
-            TestInput(SampleData.testRat, 582, 754, 579),
+            TestInput(SampleData.testNaa, 664, 870, 606),
+            TestInput(SampleData.testRat, 582, 834, 579),
             TestInput(SampleData.vaccination, 552, 724, 559),
             TestInput(SampleData.recovery, 498, 668, 501)
         )

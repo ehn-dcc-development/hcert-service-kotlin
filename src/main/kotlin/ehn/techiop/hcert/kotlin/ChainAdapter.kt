@@ -5,15 +5,12 @@ import ehn.techiop.hcert.data.Eudgc
 import ehn.techiop.hcert.kotlin.chain.Chain
 import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.asBase64
-import ehn.techiop.hcert.kotlin.chain.impl.DefaultBase45Service
 
 class ChainAdapter(
     private val title: String,
     private val chain: Chain,
     private val qrCodeService: TwoDimCodeService
 ) {
-
-    private val base45Service = DefaultBase45Service()
 
     fun process(superTitle: String, input: String): CardViewModel {
         val result = chain.encode(ObjectMapper().readValue(input, Eudgc::class.java))
@@ -22,9 +19,10 @@ class ChainAdapter(
             "$superTitle: $title",
             input = input,
             base64Items = listOf(
-                Base64Item("CBOR (Hex)", result.step1Cbor.toHexString()),
+                Base64Item("CBOR (Hex)", result.step0Cbor.toHexString()),
+                Base64Item("CWT (Hex)", result.step1Cwt.toHexString()),
                 Base64Item("COSE (Hex)", result.step2Cose.toHexString()),
-                Base64Item("Compressed COSE (Base45)", base45Service.encode(result.step3Compressed)),
+                Base64Item("Compressed COSE (Base45)", result.step4Encoded),
                 Base64Item("Prefixed Compressed COSE (Base45)", result.step5Prefixed)
             ),
             codeResources = listOf(
