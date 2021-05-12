@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
+import java.security.MessageDigest
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 import java.util.Base64
@@ -46,13 +47,15 @@ class CertificateIndexController(
     @GetMapping(value = ["/cert/listv2"], produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun getTrustListV2(): ResponseEntity<ByteArray> {
         log.info("/cert/listv2 called")
-        return ResponseEntity.ok(trustListServiceAdapter.getTrustListV2Content())
+        val body = trustListServiceAdapter.getTrustListV2Content()
+        return ResponseEntity.ok().eTag(sha256(body)).body(body)
     }
 
     @GetMapping(value = ["/cert/sigv2"], produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun getTrustListSigV2(): ResponseEntity<ByteArray> {
         log.info("/cert/sigv2 called")
-        return ResponseEntity.ok(trustListServiceAdapter.getTrustListV2Sig())
+        val body = trustListServiceAdapter.getTrustListV2Sig()
+        return ResponseEntity.ok().eTag(sha256(body)).body(body)
     }
 
     private fun loadCertificate(requestKid: String): ByteArray {
@@ -61,6 +64,11 @@ class CertificateIndexController(
             .firstOrNull { PkiUtils.calcKid(it) contentEquals kid }?.encoded
             ?: throw IllegalArgumentException("kid not known: $requestKid")
     }
+
+    private fun sha256(input: ByteArray): String =
+        MessageDigest.getInstance("SHA-256").digest(input).toHexString()
+
+    private fun ByteArray.toHexString() = joinToString("") { "%02x".format(it) }
 
 }
 
