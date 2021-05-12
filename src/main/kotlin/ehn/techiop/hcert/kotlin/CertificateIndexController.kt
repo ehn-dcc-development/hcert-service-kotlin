@@ -10,6 +10,7 @@ import eu.europa.ec.dgc.gateway.connector.DgcGatewayDownloadConnector
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RestController
@@ -41,20 +42,20 @@ class CertificateIndexController(
     @GetMapping(value = ["/cert/list"], produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun getTrustList(): ResponseEntity<ByteArray> {
         log.info("/cert/list called")
-        return ResponseEntity.ok(trustListServiceAdapter.getTrustList())
+        return ResponseEntity.ok(trustListServiceAdapter.trustListV1)
     }
 
     @GetMapping(value = ["/cert/listv2"], produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun getTrustListV2(): ResponseEntity<ByteArray> {
         log.info("/cert/listv2 called")
-        val body = trustListServiceAdapter.getTrustListV2Content()
+        val body = trustListServiceAdapter.trustListV2Content
         return ResponseEntity.ok().eTag(sha256(body)).body(body)
     }
 
     @GetMapping(value = ["/cert/sigv2"], produces = [MediaType.APPLICATION_OCTET_STREAM_VALUE])
     fun getTrustListSigV2(): ResponseEntity<ByteArray> {
         log.info("/cert/sigv2 called")
-        val body = trustListServiceAdapter.getTrustListV2Sig()
+        val body = trustListServiceAdapter.trustListV2Sig
         return ResponseEntity.ok().eTag(sha256(body)).body(body)
     }
 
@@ -80,6 +81,7 @@ class TrustListServiceAdapter(
 
     private val trustListService = TrustListV1EncodeService(signingService)
     private val trustListV2Service = TrustListV2EncodeService(signingService)
+
     private val internalCertificates = cryptoServices.map { it.getCertificate() }.toSet()
     private val certificateFactory = CertificateFactory.getInstance("X.509")
 
@@ -88,8 +90,21 @@ class TrustListServiceAdapter(
             certificateFactory.generateCertificate(it.rawData.fromBase64().inputStream()) as X509Certificate
         }.toSet()
 
-    internal fun getTrustList() = trustListService.encode(internalCertificates + loadGatewayCerts())
-    internal fun getTrustListV2Content() = trustListV2Service.encodeContent(internalCertificates + loadGatewayCerts())
-    internal fun getTrustListV2Sig() = trustListV2Service.encodeSignature(getTrustListV2Content())
+    var trustListV1 = trustListService.encode(internalCertificates + loadGatewayCerts())
+        private set
+
+    var trustListV2Content: ByteArray = trustListV2Service.encodeContent(internalCertificates + loadGatewayCerts())
+        private set
+
+    var trustListV2Sig: ByteArray = trustListV2Service.encodeSignature(trustListV2Content)
+        private set
+
+
+    @Scheduled(fixedDelayString = "PT5M", initialDelayString = "PT1M")
+    fun generateTrustList() {
+        trustListV2Content = trustListV2Service.encodeContent(internalCertificates + loadGatewayCerts())
+        trustListV2Sig = trustListV2Service.encodeSignature(trustListV2Content)
+    }
+
 
 }
