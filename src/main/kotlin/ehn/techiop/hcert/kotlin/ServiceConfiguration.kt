@@ -11,7 +11,6 @@ import ehn.techiop.hcert.kotlin.chain.CryptoService
 import ehn.techiop.hcert.kotlin.chain.CwtService
 import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.faults.FaultyBase45Service
-import ehn.techiop.hcert.kotlin.chain.faults.FaultyCborService
 import ehn.techiop.hcert.kotlin.chain.faults.FaultyCompressorService
 import ehn.techiop.hcert.kotlin.chain.faults.FaultyCoseService
 import ehn.techiop.hcert.kotlin.chain.faults.FaultyCwtService
@@ -120,7 +119,7 @@ class ServiceConfiguration {
         cryptoServiceList: Set<CryptoService>,
         downloadConnector: DgcGatewayDownloadConnector,
     ): TrustListServiceAdapter {
-        return TrustListServiceAdapter(cryptoServiceTrustList, cryptoServiceList, downloadConnector)
+        return TrustListServiceAdapter(cryptoServiceTrustList, cryptoServiceList, downloadConnector, properties)
     }
 
     @Bean

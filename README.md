@@ -180,6 +180,8 @@ app:
   trust-list:
     ec-private: classpath:ec-trust-list-private.pem
     ec-cert: classpath:ec-trust-list-cert.pem
+  trust-list-ext:
+    - file:suedtirol-dsc.pem
 dgc:
   gateway:
     connector:

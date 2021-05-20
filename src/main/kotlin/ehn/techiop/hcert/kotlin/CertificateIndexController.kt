@@ -76,35 +76,44 @@ class CertificateIndexController(
 class TrustListServiceAdapter(
     signingService: CryptoService,
     internal val cryptoServices: Set<CryptoService>,
-    private val downloadConnector: DgcGatewayDownloadConnector
+    private val downloadConnector: DgcGatewayDownloadConnector,
+    private val properties: ConfigurationProperties
 ) {
+    private val certificateFactory = CertificateFactory.getInstance("X.509")
 
     private val trustListService = TrustListV1EncodeService(signingService)
     private val trustListV2Service = TrustListV2EncodeService(signingService)
 
     private val internalCertificates = cryptoServices.map { it.getCertificate() }.toSet()
-    private val certificateFactory = CertificateFactory.getInstance("X.509")
+    private val externalCertificates = properties.trustListExt
+        .map { certificateFactory.generateCertificate(it.openStream()) as X509Certificate }
+        .toSet()
 
     private fun loadGatewayCerts() =
         downloadConnector.trustedCertificates.map {
             certificateFactory.generateCertificate(it.rawData.fromBase64().inputStream()) as X509Certificate
         }.toSet()
 
-    var trustListV1 = trustListService.encode(internalCertificates + loadGatewayCerts())
+    var trustListV1 = trustListService.encode(internalCertificates + externalCertificates + loadGatewayCerts())
         private set
 
-    var trustListV2Content: ByteArray = trustListV2Service.encodeContent(internalCertificates + loadGatewayCerts())
+    var trustListV2Content: ByteArray = loadTrustListV2Content()
         private set
 
-    var trustListV2Sig: ByteArray = trustListV2Service.encodeSignature(trustListV2Content)
+    var trustListV2Sig: ByteArray = loadTrustListV2Sig()
         private set
 
 
     @Scheduled(fixedDelayString = "PT5M", initialDelayString = "PT1M")
     fun generateTrustList() {
-        trustListV2Content = trustListV2Service.encodeContent(internalCertificates + loadGatewayCerts())
-        trustListV2Sig = trustListV2Service.encodeSignature(trustListV2Content)
+        trustListV2Content = loadTrustListV2Content()
+        trustListV2Sig = loadTrustListV2Sig()
     }
+
+    private fun loadTrustListV2Sig() = trustListV2Service.encodeSignature(trustListV2Content)
+
+    private fun loadTrustListV2Content() =
+        trustListV2Service.encodeContent(internalCertificates + externalCertificates + loadGatewayCerts())
 
 
 }
