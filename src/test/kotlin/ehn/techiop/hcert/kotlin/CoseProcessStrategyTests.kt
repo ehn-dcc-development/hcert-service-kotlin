@@ -2,7 +2,7 @@ package ehn.techiop.hcert.kotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.zxing.BarcodeFormat
-import ehn.techiop.hcert.data.Eudgc
+import ehn.techiop.hcert.data.Eudcc
 import ehn.techiop.hcert.kotlin.chain.Chain
 import ehn.techiop.hcert.kotlin.chain.SampleData
 import ehn.techiop.hcert.kotlin.chain.VerificationResult
@@ -58,7 +58,7 @@ class CoseProcessStrategyTests {
 
     private fun assertPlain(input: String, jsonInput: String) {
         val vaccinationData = processingChain.decode(input, VerificationResult())
-        val decodedFromInput = ObjectMapper().readValue(jsonInput, Eudgc::class.java)
+        val decodedFromInput = ObjectMapper().readValue(jsonInput, Eudcc::class.java)
         assertThat(vaccinationData, equalTo(decodedFromInput))
     }
 
@@ -68,10 +68,10 @@ class CoseProcessStrategyTests {
         @JvmStatic
         @Suppress("unused")
         fun inputProvider() = listOf(
-            TestInput(SampleData.testNaa, 664, 870, 606),
-            TestInput(SampleData.testRat, 582, 834, 579),
-            TestInput(SampleData.vaccination, 552, 724, 559),
-            TestInput(SampleData.recovery, 498, 668, 501)
+            TestInput(SampleData.testNaa, 642, 852, 648),
+            TestInput(SampleData.testRat, 610, 820, 628),
+            TestInput(SampleData.vaccination, 576, 786, 604),
+            TestInput(SampleData.recovery, 522, 732, 549)
         )
 
     }

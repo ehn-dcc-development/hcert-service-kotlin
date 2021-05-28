@@ -9,7 +9,7 @@ Get the certificate for verification at `/cert/{kid}`: Set your `Accept` to `tex
 
 Get the contents of encoded sample data directly at `/qrc/vaccination`, `/qrc/test`, `/qrc/recovery`.
 
-Get a trust list (V1 format) at `/cert/list`, or in V2 format at `/cert/listv2` and `/cert/sigv2`. See below for details.
+Get a trust list in V2 format at `/cert/listv2` and `/cert/sigv2`. See below for details.
 
 That trust list contains the local certificates, as well as the certificates from the [DGC Acceptance Gatway](https://github.com/eu-digital-green-certificates/dgc-gateway) (see below for configuration).
 

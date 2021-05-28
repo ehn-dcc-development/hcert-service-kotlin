@@ -1,7 +1,7 @@
 package ehn.techiop.hcert.kotlin
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import ehn.techiop.hcert.data.Eudgc
+import ehn.techiop.hcert.data.Eudcc
 import ehn.techiop.hcert.kotlin.chain.Chain
 import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.asBase64
@@ -13,7 +13,7 @@ class ChainAdapter(
 ) {
 
     fun process(superTitle: String, input: String): CardViewModel {
-        val result = chain.encode(ObjectMapper().readValue(input, Eudgc::class.java))
+        val result = chain.encode(ObjectMapper().readValue(input, Eudcc::class.java))
         val qrCode = qrCodeService.encode(result.step5Prefixed)
         return CardViewModel(
             "$superTitle: $title",
@@ -32,7 +32,7 @@ class ChainAdapter(
     }
 
     fun processSingle(input: String) =
-        chain.encode(ObjectMapper().readValue(input, Eudgc::class.java)).step5Prefixed
+        chain.encode(ObjectMapper().readValue(input, Eudcc::class.java)).step5Prefixed
 
 }
 
