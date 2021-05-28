@@ -66,23 +66,6 @@ class CertificateIndexControllerTests {
     }
 
     @Test
-    fun trustListV1() {
-        val trustListEncoded = mockMvc.get("$URL_PREFIX/list") {
-            accept(MediaType.APPLICATION_OCTET_STREAM)
-        }.andExpect {
-            status { isOk() }
-        }.andReturn().response.contentAsByteArray
-
-        val repository = TrustListCertificateRepository(
-            trustListEncoded,
-            null,
-            PrefilledCertificateRepository(cryptoServiceTrustList.getCertificate())
-        )
-
-        assertNotNull(repository)
-    }
-
-    @Test
     fun trustListV2() {
         val trustListContent = mockMvc.get("$URL_PREFIX/listv2") {
             accept(MediaType.APPLICATION_OCTET_STREAM)
