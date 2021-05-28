@@ -10,7 +10,7 @@ import java.security.cert.X509Certificate
 
 class TrustListServiceAdapter(
     signingService: CryptoService,
-    internal val cryptoServices: Set<CryptoService>,
+    cryptoServices: Set<CryptoService>,
     private val downloadConnector: DgcGatewayDownloadConnector,
     properties: ConfigurationProperties
 ) {

@@ -4,9 +4,6 @@ Run the service with `./gradlew bootRun`, browse it at <http://localhost:8080/eh
 
 ## Endpoints
 
-Get the certificate for verification at `/cert/{kid}`: Set your `Accept` to `text/plain` to get the certificate in Base64, or set it to `application/octet-stream` to get binary data.
-`{kid}` is expected to be the Base64-URL representation of the bytes from `KID` claim of the CWT.
-
 Get the contents of encoded sample data directly at `/qrc/vaccination`, `/qrc/test`, `/qrc/recovery`.
 
 Get a trust list in V2 format at `/cert/listv2` and `/cert/sigv2`. See below for details.
