@@ -9,6 +9,8 @@ import ehn.techiop.hcert.kotlin.chain.ContextIdentifierService
 import ehn.techiop.hcert.kotlin.chain.CoseService
 import ehn.techiop.hcert.kotlin.chain.CryptoService
 import ehn.techiop.hcert.kotlin.chain.CwtService
+import ehn.techiop.hcert.kotlin.chain.HigherOrderValidationService
+import ehn.techiop.hcert.kotlin.chain.SchemaValidationService
 import ehn.techiop.hcert.kotlin.chain.TwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.faults.FaultyBase45Service
 import ehn.techiop.hcert.kotlin.chain.faults.FaultyCompressorService
@@ -24,6 +26,8 @@ import ehn.techiop.hcert.kotlin.chain.impl.DefaultCompressorService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultContextIdentifierService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCoseService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCwtService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultHigherOrderValidationService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultSchemaValidationService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultTwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.impl.FileBasedCryptoService
 import ehn.techiop.hcert.kotlin.chain.impl.RandomRsaKeyCryptoService
@@ -79,6 +83,16 @@ class ServiceConfiguration {
     }
 
     @Bean
+    fun higherOrderValidationService(): HigherOrderValidationService {
+        return DefaultHigherOrderValidationService()
+    }
+
+    @Bean
+    fun schemaValidationService(): SchemaValidationService {
+        return DefaultSchemaValidationService()
+    }
+
+    @Bean
     fun cborService(): CborService {
         return DefaultCborService()
     }
@@ -124,6 +138,8 @@ class ServiceConfiguration {
 
     @Bean
     fun chainEc(
+        higherOrderValidationService: HigherOrderValidationService,
+        schemaValidationService: SchemaValidationService,
         cborService: CborService,
         cwtService: CwtService,
         coseEcService: CoseService,
@@ -133,13 +149,24 @@ class ServiceConfiguration {
     ): ChainAdapter {
         return ChainAdapter(
             "EC 256 Key",
-            Chain(cborService, cwtService, coseEcService, contextIdentifierService, compressorService, base45Service),
+            Chain(
+                higherOrderValidationService,
+                schemaValidationService,
+                cborService,
+                cwtService,
+                coseEcService,
+                compressorService,
+                base45Service,
+                contextIdentifierService
+            ),
             qrCodeService()
         )
     }
 
     @Bean
     fun chainRsa2048(
+        higherOrderValidationService: HigherOrderValidationService,
+        schemaValidationService: SchemaValidationService,
         cborService: CborService,
         cwtService: CwtService,
         coseRsaService: CoseService,
@@ -150,12 +177,14 @@ class ServiceConfiguration {
         return ChainAdapter(
             "RSA 2048 Key",
             Chain(
+                higherOrderValidationService,
+                schemaValidationService,
                 cborService,
                 cwtService,
                 coseRsaService,
-                contextIdentifierService,
                 compressorService,
-                base45Service
+                base45Service,
+                contextIdentifierService
             ),
             qrCodeService()
         )
@@ -163,6 +192,8 @@ class ServiceConfiguration {
 
     @Bean
     fun chainRsa3072(
+        higherOrderValidationService: HigherOrderValidationService,
+        schemaValidationService: SchemaValidationService,
         cborService: CborService,
         cwtService: CwtService,
         contextIdentifierService: ContextIdentifierService,
@@ -172,12 +203,14 @@ class ServiceConfiguration {
         return ChainAdapter(
             "RSA 3072 Key",
             Chain(
+                higherOrderValidationService,
+                schemaValidationService,
                 cborService,
                 cwtService,
                 DefaultCoseService(cryptoServiceRsa3072()),
-                contextIdentifierService,
                 compressorService,
-                base45Service
+                base45Service,
+                contextIdentifierService
             ),
             qrCodeService()
         )
@@ -185,6 +218,8 @@ class ServiceConfiguration {
 
     @Bean
     fun chainFaultyCbor(
+        higherOrderValidationService: HigherOrderValidationService,
+        schemaValidationService: SchemaValidationService,
         cborService: CborService,
         coseEcService: CoseService,
         contextIdentifierService: ContextIdentifierService,
@@ -194,12 +229,14 @@ class ServiceConfiguration {
         return ChainAdapter(
             "Faulty CWT (expect: FAIL)",
             Chain(
+                higherOrderValidationService,
+                schemaValidationService,
                 cborService,
                 FaultyCwtService(),
                 coseEcService,
-                contextIdentifierService,
                 compressorService,
-                base45Service
+                base45Service,
+                contextIdentifierService,
             ),
             qrCodeService()
         )
@@ -207,6 +244,8 @@ class ServiceConfiguration {
 
     @Bean
     fun chainNonVerifiableCose(
+        higherOrderValidationService: HigherOrderValidationService,
+        schemaValidationService: SchemaValidationService,
         cborService: CborService,
         cwtService: CwtService,
         contextIdentifierService: ContextIdentifierService,
@@ -216,12 +255,14 @@ class ServiceConfiguration {
         return ChainAdapter(
             "Faulty COSE (non-verifiable signature) (expect: FAIL)",
             Chain(
+                higherOrderValidationService,
+                schemaValidationService,
                 cborService,
                 cwtService,
                 NonVerifiableCoseService(cryptoServiceEc()),
-                contextIdentifierService,
                 compressorService,
-                base45Service
+                base45Service,
+                contextIdentifierService
             ),
             qrCodeService()
         )
@@ -229,6 +270,8 @@ class ServiceConfiguration {
 
     @Bean
     fun chainUnprotectedCose(
+        higherOrderValidationService: HigherOrderValidationService,
+        schemaValidationService: SchemaValidationService,
         cborService: CborService,
         cwtService: CwtService,
         contextIdentifierService: ContextIdentifierService,
@@ -238,12 +281,14 @@ class ServiceConfiguration {
         return ChainAdapter(
             "Unprotected COSE (KID in unprotected header) (expect: GOOD)",
             Chain(
+                higherOrderValidationService,
+                schemaValidationService,
                 cborService,
                 cwtService,
                 UnprotectedCoseService(cryptoServiceEc()),
-                contextIdentifierService,
                 compressorService,
-                base45Service
+                base45Service,
+                contextIdentifierService
             ),
             qrCodeService()
         )
@@ -251,6 +296,8 @@ class ServiceConfiguration {
 
     @Bean
     fun chainFaultyCose(
+        higherOrderValidationService: HigherOrderValidationService,
+        schemaValidationService: SchemaValidationService,
         cborService: CborService,
         cwtService: CwtService,
         contextIdentifierService: ContextIdentifierService,
@@ -260,12 +307,14 @@ class ServiceConfiguration {
         return ChainAdapter(
             "Faulty COSE (not a valid COSE) (expect: FAIL)",
             Chain(
+                higherOrderValidationService,
+                schemaValidationService,
                 cborService,
                 cwtService,
                 FaultyCoseService(cryptoServiceEc()),
-                contextIdentifierService,
                 compressorService,
-                base45Service
+                base45Service,
+                contextIdentifierService
             ),
             qrCodeService()
         )
@@ -273,6 +322,8 @@ class ServiceConfiguration {
 
     @Bean
     fun chainFaultyContextIdentifier(
+        higherOrderValidationService: HigherOrderValidationService,
+        schemaValidationService: SchemaValidationService,
         cborService: CborService,
         cwtService: CwtService,
         coseEcService: CoseService,
@@ -282,12 +333,14 @@ class ServiceConfiguration {
         return ChainAdapter(
             "Faulty ContextIdentifier (HC2:) (expect: FAIL)",
             Chain(
+                higherOrderValidationService,
+                schemaValidationService,
                 cborService,
                 cwtService,
                 coseEcService,
-                DefaultContextIdentifierService("HC2:"),
                 compressorService,
-                base45Service
+                base45Service,
+                DefaultContextIdentifierService("HC2:")
             ),
             qrCodeService()
         )
@@ -295,6 +348,8 @@ class ServiceConfiguration {
 
     @Bean
     fun chainNoopContextIdentifier(
+        higherOrderValidationService: HigherOrderValidationService,
+        schemaValidationService: SchemaValidationService,
         cborService: CborService,
         cwtService: CwtService,
         coseEcService: CoseService,
@@ -304,12 +359,14 @@ class ServiceConfiguration {
         return ChainAdapter(
             "No-op ContextIdentifier (expect: GOOD)",
             Chain(
+                higherOrderValidationService,
+                schemaValidationService,
                 cborService,
                 cwtService,
                 coseEcService,
-                NoopContextIdentifierService(),
                 compressorService,
-                base45Service
+                base45Service,
+                NoopContextIdentifierService()
             ),
             qrCodeService()
         )
@@ -317,6 +374,8 @@ class ServiceConfiguration {
 
     @Bean
     fun chainFaultyBase45(
+        higherOrderValidationService: HigherOrderValidationService,
+        schemaValidationService: SchemaValidationService,
         cborService: CborService,
         cwtService: CwtService,
         coseEcService: CoseService,
@@ -326,12 +385,14 @@ class ServiceConfiguration {
         return ChainAdapter(
             "Faulty Base45 (expect: FAIL)",
             Chain(
+                higherOrderValidationService,
+                schemaValidationService,
                 cborService,
                 cwtService,
                 coseEcService,
-                contextIdentifierService,
                 compressorService,
-                FaultyBase45Service()
+                FaultyBase45Service(),
+                contextIdentifierService
             ),
             qrCodeService()
         )
@@ -339,6 +400,8 @@ class ServiceConfiguration {
 
     @Bean
     fun chainFaultyCompressor(
+        higherOrderValidationService: HigherOrderValidationService,
+        schemaValidationService: SchemaValidationService,
         cborService: CborService,
         cwtService: CwtService,
         coseEcService: CoseService,
@@ -348,12 +411,14 @@ class ServiceConfiguration {
         return ChainAdapter(
             "Faulty Compressor (expect: FAIL)",
             Chain(
+                higherOrderValidationService,
+                schemaValidationService,
                 cborService,
                 cwtService,
                 coseEcService,
-                contextIdentifierService,
                 FaultyCompressorService(),
-                base45Service
+                base45Service,
+                contextIdentifierService,
             ),
             qrCodeService()
         )
@@ -361,6 +426,8 @@ class ServiceConfiguration {
 
     @Bean
     fun chainNoopCompressor(
+        higherOrderValidationService: HigherOrderValidationService,
+        schemaValidationService: SchemaValidationService,
         cborService: CborService,
         cwtService: CwtService,
         coseEcService: CoseService,
@@ -368,14 +435,16 @@ class ServiceConfiguration {
         base45Service: Base45Service
     ): ChainAdapter {
         return ChainAdapter(
-            "No-op Compressor (expect: GOOD)",
+            "No-op Compressor (expect: FAIL)",
             Chain(
+                higherOrderValidationService,
+                schemaValidationService,
                 cborService,
                 cwtService,
                 coseEcService,
-                contextIdentifierService,
                 NoopCompressorService(),
-                base45Service
+                base45Service,
+                contextIdentifierService
             ),
             qrCodeService()
         )

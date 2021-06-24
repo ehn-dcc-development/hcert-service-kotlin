@@ -1,8 +1,6 @@
 package ehn.techiop.hcert.kotlin
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.zxing.BarcodeFormat
-import ehn.techiop.hcert.data.Eudcc
 import ehn.techiop.hcert.kotlin.chain.Chain
 import ehn.techiop.hcert.kotlin.chain.SampleData
 import ehn.techiop.hcert.kotlin.chain.VerificationResult
@@ -12,8 +10,13 @@ import ehn.techiop.hcert.kotlin.chain.impl.DefaultCompressorService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultContextIdentifierService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCoseService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultCwtService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultHigherOrderValidationService
+import ehn.techiop.hcert.kotlin.chain.impl.DefaultSchemaValidationService
 import ehn.techiop.hcert.kotlin.chain.impl.DefaultTwoDimCodeService
 import ehn.techiop.hcert.kotlin.chain.impl.RandomEcKeyCryptoService
+import ehn.techiop.hcert.kotlin.data.GreenCertificate
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.startsWith
 import org.hamcrest.MatcherAssert.assertThat
@@ -34,8 +37,10 @@ class CoseProcessStrategyTests {
     private val contextIdentifierService = DefaultContextIdentifierService()
     private val compressorService = DefaultCompressorService()
     private val base45Service = DefaultBase45Service()
+    private val higherOrderValidationService = DefaultHigherOrderValidationService()
+    private val schemaValidationService = DefaultSchemaValidationService()
     private val processingChain =
-        Chain(cborService, cwtService, coseService, contextIdentifierService, compressorService, base45Service)
+        Chain(higherOrderValidationService, schemaValidationService, cborService, cwtService, coseService, compressorService, base45Service, contextIdentifierService)
     private val processingChainAdapter = ChainAdapter(title, processingChain, qrCodeService)
 
     @ParameterizedTest
@@ -57,8 +62,9 @@ class CoseProcessStrategyTests {
     private fun isAround(input: Int) = allOf(greaterThan(input.div(10) * 9), lessThan(input.div(10) * 11))
 
     private fun assertPlain(input: String, jsonInput: String) {
-        val vaccinationData = processingChain.decode(input, VerificationResult())
-        val decodedFromInput = ObjectMapper().readValue(jsonInput, Eudcc::class.java)
+        val decodeResult = processingChain.decode(input)
+        val vaccinationData = decodeResult.chainDecodeResult.eudgc
+        val decodedFromInput = Json.decodeFromString<GreenCertificate>(jsonInput)
         assertThat(vaccinationData, equalTo(decodedFromInput))
     }
 

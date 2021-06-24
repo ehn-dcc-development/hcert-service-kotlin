@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "ehn.techiop.hcert"
-version = "0.4.0-SNAPSHOT"
+version = "1.2.0-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 idea {
@@ -37,13 +37,10 @@ repositories {
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-	implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1")
-	implementation("org.jetbrains.kotlinx:kotlinx-serialization-cbor:1.2.1")
     implementation("com.google.zxing:core:3.4.1")
-	implementation("ehn.techiop.hcert:hcert-kotlin:0.4.0-SNAPSHOT")
+	implementation("ehn.techiop.hcert:hcert-kotlin-jvmdatagen:1.2.0-SNAPSHOT")
 	implementation("eu.europa.ec.dgc:dgc-lib:1.0.0-SNAPSHOT")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")

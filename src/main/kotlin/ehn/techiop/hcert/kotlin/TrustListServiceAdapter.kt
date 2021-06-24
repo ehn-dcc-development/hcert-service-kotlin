@@ -2,6 +2,7 @@ package ehn.techiop.hcert.kotlin
 
 import ehn.techiop.hcert.kotlin.chain.CryptoService
 import ehn.techiop.hcert.kotlin.chain.fromBase64
+import ehn.techiop.hcert.kotlin.crypto.CertificateAdapter
 import ehn.techiop.hcert.kotlin.trust.TrustListV2EncodeService
 import eu.europa.ec.dgc.gateway.connector.DgcGatewayDownloadConnector
 import org.springframework.scheduling.annotation.Scheduled
@@ -16,15 +17,17 @@ class TrustListServiceAdapter(
 ) {
     private val certificateFactory = CertificateFactory.getInstance("X.509")
     private val trustListV2Service = TrustListV2EncodeService(signingService)
-    private val internalCertificates = cryptoServices.map { it.getCertificate() }.toSet()
-    private val externalCertificates = properties.trustListExt
+    private val internalCertificates: Set<CertificateAdapter> = cryptoServices.map { it.getCertificate() }.toSet()
+    private val externalCertificates: Set<CertificateAdapter> = properties.trustListExt
         .map { certificateFactory.generateCertificate(it.openStream()) as X509Certificate }
+        .map { CertificateAdapter(it) }
         .toSet()
 
-    private fun loadGatewayCerts() =
-        downloadConnector.trustedCertificates.map {
-            certificateFactory.generateCertificate(it.rawData.fromBase64().inputStream()) as X509Certificate
-        }.toSet()
+    private fun loadGatewayCerts() = downloadConnector.trustedCertificates
+        .map { it.rawData.fromBase64() }
+        .map { certificateFactory.generateCertificate(it.inputStream()) as X509Certificate }
+        .map { CertificateAdapter(it) }
+        .toSet()
 
     private fun loadTrustListV2Sig() = trustListV2Service.encodeSignature(trustListV2Content)
 
